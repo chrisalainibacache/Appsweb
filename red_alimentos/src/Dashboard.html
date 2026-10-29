@@ -282,7 +282,7 @@
       kpi('Retiros', NUM.format(sel.retiros.length), sel.retiros.filter(function (r) { return !r.nLineas; }).length + ' sin contenido'),
       kpi('Kilos', NUM.format(t.kg), 'a ' + CLP.format(datos.tarifas.kg) + '/kg'),
       kpi('Litros', NUM.format(t.lt), 'a ' + CLP.format(datos.tarifas.lt) + '/lt'),
-      kpi('Total pagado', CLP.format(t.monto), ''),
+      kpi('Total pagado', CLP.format(t.monto), t.sinCobro ? CLP.format(t.sinCobro) + ' no cobrado' : ''),
       kpi('Valor de mercado', CLP.format(t.mercado), 'referencial'),
       kpi('Diferencia a favor', CLP.format(ahorro), 'pagas el ' + pct + '% del valor')
     ].join('');
@@ -394,7 +394,11 @@
     const describir = function (r) { return fechaCorta(r.fecha) + ' · ' + r.local + ' · ' + r.estado + ' · ' + CLP.format(r.monto); };
     const porSituacion = function (s) { return datos.retiros.filter(function (r) { return r.situacion === s; }).map(describir); };
     const corregidas = datos.lineas.filter(function (l) { return l.correccion; }).map(function (l) {
-      return l.producto + ' · portal ' + NUM.format(l.pesoPortal) + ' → ' + NUM.format(l.peso) + ' ' + l.medida + ' · ' + l.correccion;
+      const peso = l.pesoPortal !== null && l.pesoPortal !== undefined
+        ? 'portal ' + NUM.format(l.pesoPortal) + ' → ' + NUM.format(l.peso) + ' ' + l.medida
+        : NUM.format(l.peso) + ' ' + l.medida;
+      return fechaCorta((datos.retiros.filter(function (r) { return r.id === l.idRetiro; })[0] || {}).fecha) + ' · ' +
+        l.producto + ' · ' + peso + (l.cobrado ? '' : ' · no se cobra (' + CLP.format(l.montoSinCobro) + ')') + ' · ' + l.correccion;
     });
     $('alertas').innerHTML =
       bloque('Pendientes con fecha vencida: se pagan como retirados', porSituacion('Pendiente vencido (se asume retirado)')) +
@@ -420,9 +424,9 @@
   function totales(lineas) {
     return lineas.reduce(function (t, l) {
       if (l.medida === 'lt') t.lt += l.peso; else t.kg += l.peso;
-      t.monto += l.monto; t.mercado += l.valorMercado;
+      t.monto += l.monto; t.mercado += l.valorMercado; t.sinCobro += l.montoSinCobro || 0;
       return t;
-    }, { kg: 0, lt: 0, monto: 0, mercado: 0 });
+    }, { kg: 0, lt: 0, monto: 0, mercado: 0, sinCobro: 0 });
   }
 
   function resumirPor(lineas, claveFn) {

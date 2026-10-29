@@ -84,10 +84,13 @@ function obtenerDatos_() {
     .filter(function (f) { return String(f.palabra_clave).trim() !== '*'; })
     .map(function (f) { return [f.palabra_clave, f]; }));
 
+  // Correcciones manuales por retiro (id o "*" para todos) y producto (texto que contiene):
+  // peso_corregido reemplaza el peso del portal; cobrar = "no" deja el pago en $0.
   const correcciones = leerTabla_(ss, HOJAS.CORRECCIONES).map(function (c) {
+    const peso = String(c.peso_corregido).trim() === '' ? NaN : Number(c.peso_corregido);
     return { idRetiro: String(c.id_retiro).trim(), producto: normalizarTexto_(c.producto),
-      peso: Number(c.peso_corregido), nota: c.nota };
-  }).filter(function (c) { return c.idRetiro && c.producto && !isNaN(c.peso); });
+      peso: peso, cobrar: !/^no$/i.test(String(c.cobrar).trim()), nota: c.nota };
+  }).filter(function (c) { return c.idRetiro && c.producto && (!isNaN(c.peso) || !c.cobrar); });
 
   const lineas = leerTabla_(ss, HOJAS.LINEAS).map(function (l) {
     const nombre = normalizarTexto_(l.producto);
@@ -96,10 +99,12 @@ function obtenerDatos_() {
     const precioUnit = precio ? Number(precio.precio_clp) || 0 : 0;
     const pesoPortal = Number(l.peso) || 0;
     const correccion = correcciones.filter(function (c) {
-      return c.idRetiro === String(l.id_retiro) && nombre.indexOf(c.producto) >= 0;
+      return (c.idRetiro === '*' || c.idRetiro === String(l.id_retiro)) && nombre.indexOf(c.producto) >= 0;
     })[0];
-    const peso = correccion ? correccion.peso : pesoPortal;
-    const monto = correccion ? redondear_(peso * (Number(l.tarifa) || 0)) : Number(l.monto_pagado) || 0;
+    const peso = correccion && !isNaN(correccion.peso) ? correccion.peso : pesoPortal;
+    const cobrado = !correccion || correccion.cobrar;
+    const monto = !cobrado ? 0
+      : correccion ? redondear_(peso * (Number(l.tarifa) || 0)) : Number(l.monto_pagado) || 0;
     return {
       idRetiro: l.id_retiro, producto: l.producto, clave: nombre, cantidad: l.cantidad,
       unidad: l.unidad, peso: peso, medida: l.medida,
@@ -107,8 +112,10 @@ function obtenerDatos_() {
       precioMercado: precioUnit,
       valorMercado: Math.round(peso * precioUnit),
       fuentePrecio: precio ? (String(precio.palabra_clave) === '*' ? 'Promedio categoría' : precio.fuente) : '',
-      pesoPortal: correccion ? pesoPortal : null,
-      correccion: correccion ? (correccion.nota || 'Corregido a mano') : ''
+      pesoPortal: correccion && peso !== pesoPortal ? pesoPortal : null,
+      cobrado: cobrado,
+      montoSinCobro: cobrado ? 0 : redondear_(peso * (Number(l.tarifa) || 0)),
+      correccion: correccion ? (correccion.nota || (cobrado ? 'Corregido a mano' : 'No se cobra')) : ''
     };
   });
 

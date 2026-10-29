@@ -27,7 +27,7 @@ const COLUMNAS = {
   Precios: ['palabra_clave', 'categoria', 'precio_clp', 'por', 'fuente', 'fecha'],
   Config: ['clave', 'valor', 'descripcion'],
   Cargas: ['fecha', 'origen_carga', 'recibidos', 'nuevos', 'duplicados', 'vacios', 'detalle'],
-  Correcciones: ['id_retiro', 'producto', 'peso_original', 'peso_corregido', 'nota', 'fecha']
+  Correcciones: ['id_retiro', 'producto', 'peso_original', 'peso_corregido', 'cobrar', 'nota', 'fecha']
 };
 
 /** Valores por defecto de la hoja Config (editables en la planilla). */

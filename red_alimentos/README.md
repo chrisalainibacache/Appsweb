@@ -34,7 +34,7 @@ compara ese pago con el valor de mercado de lo retirado.
 | `Precios` | Precio de mercado por kg o lt, con fuente. `*` = precio por defecto de la categoría |
 | `Config` | `tarifa_kg`, `tarifa_lt` (solo afectan a las cargas nuevas) |
 | `Cargas` | Registro de cada carga: recibidos, nuevos, duplicados, vacíos y estados actualizados |
-| `Correcciones` | Ajustes manuales de peso: `id_retiro`, `producto` (texto que contiene), `peso_original`, `peso_corregido`, `nota` |
+| `Correcciones` | Ajustes manuales por línea: `id_retiro` (o `*` para todos), `producto` (texto que contiene), `peso_original`, `peso_corregido` (vacío = el del portal), `cobrar` (`no` = pago en $0, los kilos siguen contando), `nota`. Viene con el queso azul (ID 6783) y las mandarinas (ID 5970) marcados como no cobrados |
 
 ### Qué se paga
 

@@ -24,6 +24,7 @@ function configurarPlanilla() {
   poblarSiVacia_(ss.getSheetByName(HOJAS.CONFIG), CONFIG_DEFECTO);
   poblarSiVacia_(ss.getSheetByName(HOJAS.CATEGORIAS), CATEGORIAS_DEFECTO);
   poblarSiVacia_(ss.getSheetByName(HOJAS.PRECIOS), PRECIOS_DEFECTO);
+  poblarSiVacia_(ss.getSheetByName(HOJAS.CORRECCIONES), CORRECCIONES_DEFECTO);
 
   ss.getSheetByName(HOJAS.RETIROS).getRange('D:D').setNumberFormat('dd-mm-yyyy');
   ss.getSheetByName(HOJAS.RETIROS).getRange('F:F').setNumberFormat('dd-mm-yyyy');

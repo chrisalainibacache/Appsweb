@@ -137,3 +137,9 @@ const PRECIOS_DEFECTO = [
   ['*', 'Mascotas', 1600, 'kg', FUENTE_ESTIMADA, '2026-10-29'],
   ['*', 'Otros', 3000, 'kg', FUENTE_ESTIMADA, '2026-10-29']
 ];
+
+/** [id_retiro, producto, peso_original, peso_corregido, cobrar, nota, fecha] */
+const CORRECCIONES_DEFECTO = [
+  ['B-6783', 'queso azul', 55.65, '', 'no', 'No se cobró: no pidieron valor de recuperación', '2026-10-29'],
+  ['B-5970', 'mandarina', 0, '', 'no', 'No se cobró: no pidieron valor de recuperación', '2026-10-29']
+];
