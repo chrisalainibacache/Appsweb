@@ -33,7 +33,24 @@ compara ese pago con el valor de mercado de lo retirado.
 | `Categorias` | `palabra_clave → categoria` (editable) |
 | `Precios` | Precio de mercado por kg o lt, con fuente. `*` = precio por defecto de la categoría |
 | `Config` | `tarifa_kg`, `tarifa_lt` (solo afectan a las cargas nuevas) |
-| `Cargas` | Registro de cada carga: recibidos, nuevos, duplicados y vacíos |
+| `Cargas` | Registro de cada carga: recibidos, nuevos, duplicados, vacíos y estados actualizados |
+| `Correcciones` | Ajustes manuales de peso: `id_retiro`, `producto` (texto que contiene), `peso_original`, `peso_corregido`, `nota` |
+
+### Qué se paga
+
+| Estado en el portal | ¿Se paga? |
+|---|---|
+| Retirada | Sí |
+| Pendiente con fecha de retiro ya pasada | Sí: se retiró aunque el portal no lo haya movido |
+| Pendiente con fecha de hoy o futura | Todavía no |
+| Cancelada / anulada / rechazada | No |
+
+El dashboard suma solo lo que se paga; el filtro *Retiros → Todos* muestra el resto y la
+pestaña *Alertas* lista pendientes vencidos, pendientes por retirar, cancelados y correcciones.
+Si un retiro vuelve a cargarse con otro estado (p. ej. de *Pendiente* a *Retirada*), se actualiza.
+
+Las correcciones se aplican al leer: el peso corregido reemplaza al del portal, el pago se
+recalcula con la tarifa de la línea y el detalle muestra el peso original del portal.
 
 Para calzar categorías y precios, el nombre del producto se compara sin tildes ni
 mayúsculas y la palabra clave tiene que aparecer como palabra completa (acepta plural).
@@ -88,7 +105,7 @@ Los tokens se guardan solo en el navegador (`localStorage`), nunca en el código
 
 ## Cargar retiros nuevos
 
-1. Entra al portal con tu usuario y abre *Retiros históricos*.
+1. Entra al portal con tu usuario y abre *Retiros históricos* (después repite en *pendientes de retiro*).
 2. Abre la consola (F12) y pega `scraper/extraer_redalimentos.js`.
    - Opcional: completa `API_URL` y `TOKEN_CARGA` para que lo envíe directo.
    - Opcional: `DESDE = 'dd-mm-aaaa'` para no recorrer todo el historial.

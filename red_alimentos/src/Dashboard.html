@@ -89,6 +89,9 @@
     </label>
     <label>Tipo <select id="fTipo"><option value="">Todos</option></select></label>
     <label>Local / canal <select id="fLocal"><option value="">Todos</option></select></label>
+    <label>Retiros
+      <select id="fSituacion"><option value="">Solo los que se pagan</option><option value="todos">Todos (incluye pendientes y cancelados)</option></select>
+    </label>
     <button class="secundario" id="btnLimpiar">Limpiar</button>
   </section>
 
@@ -244,9 +247,9 @@
   }
 
   function filtrar() {
-    const f = { desde: $('fDesde').value, hasta: $('fHasta').value, origen: $('fOrigen').value, tipo: $('fTipo').value, local: $('fLocal').value };
+    const f = { desde: $('fDesde').value, hasta: $('fHasta').value, origen: $('fOrigen').value, tipo: $('fTipo').value, local: $('fLocal').value, todos: $('fSituacion').value === 'todos' };
     const retiros = datos.retiros.filter(function (r) {
-      return (!f.desde || r.fecha >= f.desde) && (!f.hasta || r.fecha <= f.hasta) &&
+      return (f.todos || r.pagable) && (!f.desde || r.fecha >= f.desde) && (!f.hasta || r.fecha <= f.hasta) &&
         (!f.origen || r.origen === f.origen) && (!f.tipo || r.tipo === f.tipo) && (!f.local || r.local === f.local);
     });
     const porId = {};
@@ -347,7 +350,7 @@
   function renderHistorial(sel) {
     const cols = [
       { t: 'Fecha', k: 'fecha', f: fechaCorta }, { t: 'Origen', k: 'origen' }, { t: 'Tipo', k: 'tipo' },
-      { t: 'Local / canal', k: 'local' }, { t: 'Estado', k: 'estado' }, { t: 'Productos', k: 'nLineas', n: 1 },
+      { t: 'Local / canal', k: 'local' }, { t: 'Estado portal', k: 'estado' }, { t: 'Situación', k: 'situacion' }, { t: 'Productos', k: 'nLineas', n: 1 },
       { t: 'Kg', k: 'kg', n: 1, f: NUM.format }, { t: 'Litros', k: 'lt', n: 1, f: NUM.format },
       { t: 'Pagado', k: 'monto', n: 1, f: CLP.format }
     ];
@@ -356,8 +359,10 @@
       if (!ls.length) return '<span class="alerta">Retiro sin contenido en el portal. Revisar la guía.</span>';
       return '<table><tr><th>Producto</th><th>Categoría</th><th class="num">Cant.</th><th>Unidad</th><th class="num">Peso</th><th class="num">Pagado</th><th>Vence</th></tr>' +
         ls.map(function (l) {
-          return '<tr><td>' + esc(l.producto) + '</td><td>' + esc(l.categoria) + '</td><td class="num">' + NUM.format(l.cantidad) +
-            '</td><td>' + esc(l.unidad) + '</td><td class="num">' + NUM.format(l.peso) + ' ' + l.medida + '</td><td class="num">' +
+          return '<tr><td>' + esc(l.producto) + (l.correccion ? ' <span class="etiqueta alerta">' + esc(l.correccion) + '</span>' : '') +
+            '</td><td>' + esc(l.categoria) + '</td><td class="num">' + NUM.format(l.cantidad) +
+            '</td><td>' + esc(l.unidad) + '</td><td class="num">' + NUM.format(l.peso) + ' ' + l.medida +
+            (l.pesoPortal !== null && l.pesoPortal !== undefined ? ' <span class="etiqueta">portal: ' + NUM.format(l.pesoPortal) + '</span>' : '') + '</td><td class="num">' +
             CLP.format(l.monto) + '</td><td>' + fechaCorta(l.vence) + '</td></tr>';
         }).join('') + '</table>';
     });
@@ -386,7 +391,16 @@
     const vacios = sel.retiros.filter(function (r) { return !r.nLineas; });
     const pesoCero = sel.lineas.filter(function (l) { return !l.peso; });
     const sinPrecio = unicos(sel.lineas.filter(function (l) { return l.fuentePrecio === 'Promedio categoría'; }).map(function (l) { return l.producto; }));
+    const describir = function (r) { return fechaCorta(r.fecha) + ' · ' + r.local + ' · ' + r.estado + ' · ' + CLP.format(r.monto); };
+    const porSituacion = function (s) { return datos.retiros.filter(function (r) { return r.situacion === s; }).map(describir); };
+    const corregidas = datos.lineas.filter(function (l) { return l.correccion; }).map(function (l) {
+      return l.producto + ' · portal ' + NUM.format(l.pesoPortal) + ' → ' + NUM.format(l.peso) + ' ' + l.medida + ' · ' + l.correccion;
+    });
     $('alertas').innerHTML =
+      bloque('Pendientes con fecha vencida: se pagan como retirados', porSituacion('Pendiente vencido (se asume retirado)')) +
+      bloque('Pendientes por retirar: todavía no se pagan', porSituacion('Pendiente por retirar')) +
+      bloque('Cancelados: no se pagan', porSituacion('Cancelado')) +
+      bloque('Correcciones manuales (hoja Correcciones)', corregidas) +
       bloque('Retiros sin contenido (' + vacios.length + ')', vacios.map(function (r) {
         return fechaCorta(r.fecha) + ' · ' + r.local + (r.idSolicitud ? ' · ID ' + r.idSolicitud : '');
       })) +
@@ -573,10 +587,10 @@
     guardar('tab', tabActiva);
     render();
   });
-  ['fDesde', 'fHasta', 'fOrigen', 'fTipo', 'fLocal'].forEach(function (id) { $(id).addEventListener('change', render); });
+  ['fDesde', 'fHasta', 'fOrigen', 'fTipo', 'fLocal', 'fSituacion'].forEach(function (id) { $(id).addEventListener('change', render); });
   $('buscarProducto').addEventListener('input', render);
   $('btnLimpiar').onclick = function () {
-    ['fDesde', 'fHasta', 'fOrigen', 'fTipo', 'fLocal'].forEach(function (id) { $(id).value = ''; });
+    ['fDesde', 'fHasta', 'fOrigen', 'fTipo', 'fLocal', 'fSituacion'].forEach(function (id) { $(id).value = ''; });
     render();
   };
   $('btnActualizar').onclick = cargar;

@@ -84,26 +84,52 @@ function obtenerDatos_() {
     .filter(function (f) { return String(f.palabra_clave).trim() !== '*'; })
     .map(function (f) { return [f.palabra_clave, f]; }));
 
-  const retiros = leerTabla_(ss, HOJAS.RETIROS).map(function (r) {
-    return {
-      id: r.id, origen: r.origen, tipo: r.tipo, fecha: fmt(r.fecha_retiro), hora: r.hora_retiro,
-      local: r.local, direccion: r.direccion, estado: r.estado, cajas: r.cajas,
-      idSolicitud: r.id_solicitud, nLineas: r.n_lineas, kg: r.kg, lt: r.lt, monto: r.monto_pagado
-    };
-  });
+  const correcciones = leerTabla_(ss, HOJAS.CORRECCIONES).map(function (c) {
+    return { idRetiro: String(c.id_retiro).trim(), producto: normalizarTexto_(c.producto),
+      peso: Number(c.peso_corregido), nota: c.nota };
+  }).filter(function (c) { return c.idRetiro && c.producto && !isNaN(c.peso); });
 
   const lineas = leerTabla_(ss, HOJAS.LINEAS).map(function (l) {
     const nombre = normalizarTexto_(l.producto);
     const categoria = categorizar(nombre) || 'Otros';
     const precio = buscarPrecio(nombre) || preciosPorDefecto[categoria] || preciosPorDefecto['Otros'] || null;
     const precioUnit = precio ? Number(precio.precio_clp) || 0 : 0;
+    const pesoPortal = Number(l.peso) || 0;
+    const correccion = correcciones.filter(function (c) {
+      return c.idRetiro === String(l.id_retiro) && nombre.indexOf(c.producto) >= 0;
+    })[0];
+    const peso = correccion ? correccion.peso : pesoPortal;
+    const monto = correccion ? redondear_(peso * (Number(l.tarifa) || 0)) : Number(l.monto_pagado) || 0;
     return {
       idRetiro: l.id_retiro, producto: l.producto, clave: nombre, cantidad: l.cantidad,
-      unidad: l.unidad, peso: Number(l.peso) || 0, medida: l.medida,
-      monto: Number(l.monto_pagado) || 0, vence: fmt(l.fecha_vencimiento), categoria: categoria,
+      unidad: l.unidad, peso: peso, medida: l.medida,
+      monto: monto, vence: fmt(l.fecha_vencimiento), categoria: categoria,
       precioMercado: precioUnit,
-      valorMercado: Math.round((Number(l.peso) || 0) * precioUnit),
-      fuentePrecio: precio ? (String(precio.palabra_clave) === '*' ? 'Promedio categoría' : precio.fuente) : ''
+      valorMercado: Math.round(peso * precioUnit),
+      fuentePrecio: precio ? (String(precio.palabra_clave) === '*' ? 'Promedio categoría' : precio.fuente) : '',
+      pesoPortal: correccion ? pesoPortal : null,
+      correccion: correccion ? (correccion.nota || 'Corregido a mano') : ''
+    };
+  });
+
+  // Totales por retiro desde las líneas, para que incluyan las correcciones.
+  const totales = {};
+  lineas.forEach(function (l) {
+    const t = totales[l.idRetiro] || (totales[l.idRetiro] = { kg: 0, lt: 0, monto: 0 });
+    if (l.medida === 'lt') t.lt += l.peso; else t.kg += l.peso;
+    t.monto += l.monto;
+  });
+
+  const hoy = Utilities.formatDate(new Date(), tz, 'yyyy-MM-dd');
+  const retiros = leerTabla_(ss, HOJAS.RETIROS).map(function (r) {
+    const fecha = fmt(r.fecha_retiro);
+    const t = totales[r.id] || { kg: 0, lt: 0, monto: 0 };
+    const pago = clasificarPago_(r.estado, fecha, hoy);
+    return {
+      id: r.id, origen: r.origen, tipo: r.tipo, fecha: fecha, hora: r.hora_retiro,
+      local: r.local, direccion: r.direccion, estado: r.estado, cajas: r.cajas,
+      idSolicitud: r.id_solicitud, nLineas: r.n_lineas, kg: redondear_(t.kg), lt: redondear_(t.lt),
+      monto: redondear_(t.monto), pagable: pago.pagable, situacion: pago.situacion
     };
   });
 
@@ -117,6 +143,21 @@ function obtenerDatos_() {
       return { clave: f.palabra_clave, categoria: f.categoria, precio: f.precio_clp, por: f.por, fuente: f.fuente };
     })
   };
+}
+
+/**
+ * Aplica la regla de pago (ver Config.gs) a un retiro.
+ * @param {string} estado estado tal como viene del portal
+ * @param {string} fecha fecha de retiro 'yyyy-MM-dd' ('' si no tiene)
+ * @param {string} hoy fecha de hoy 'yyyy-MM-dd'
+ * @return {{pagable: boolean, situacion: string}}
+ */
+function clasificarPago_(estado, fecha, hoy) {
+  const e = String(estado || '');
+  if (ESTADOS_NO_PAGABLES.test(e)) return { pagable: false, situacion: 'Cancelado' };
+  if (ESTADOS_RETIRADOS.test(e)) return { pagable: true, situacion: 'Retirado' };
+  if (fecha && fecha < hoy) return { pagable: true, situacion: 'Pendiente vencido (se asume retirado)' };
+  return { pagable: false, situacion: 'Pendiente por retirar' };
 }
 
 /**

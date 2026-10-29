@@ -4,7 +4,10 @@
  * Uso:
  *  1. Inicia sesión en el portal y abre "Retiros históricos" (/os/historical-boxes).
  *  2. Abre la consola del navegador (F12 → Consola), pega este archivo completo y presiona Enter.
- *  3. Recorre "Directo en tienda" y "En Bodega", abre el detalle de cada fila y:
+ *  3. Repite en la sección de retiros pendientes: los pendientes con fecha ya pasada
+ *     también se pagan (la planilla aplica la regla; ver Config.gs).
+ *  4. En cada página recorre las pestañas "Directo en tienda" y "En Bodega" (o, si no
+ *     las hay, la lista que esté a la vista), abre el detalle de cada fila y:
  *       - descarga un respaldo retiros_AAAA-MM-DD.json, y
  *       - si configuraste API_URL y TOKEN_CARGA, lo envía directo a la planilla.
  *     Los retiros ya cargados se omiten en el servidor, así que se puede repetir sin duplicar.
@@ -82,6 +85,14 @@
   }
 
   // ---------- parseo del detalle ----------
+  // El título del detalle dice "Detalle de retiro — En bodega" o "— Directo en tienda".
+  const srcDeTitulo = (texto, defecto) => {
+    const titulo = (texto.split('\n')[0] || '').toLowerCase();
+    if (titulo.includes('bodega')) return 'bodega';
+    if (titulo.includes('tienda')) return 'tienda';
+    return defecto || (texto.includes('ID solicitud') ? 'bodega' : 'tienda');
+  };
+
   function parsearDetalle(src, texto) {
     const corte = texto.indexOf('Contenido de Cajas');
     const cabecera = texto.slice(0, corte < 0 ? texto.length : corte).split('\n').map((s) => s.trim()).filter(Boolean);
@@ -107,25 +118,29 @@
   const resultado = { tienda: [], bodega: [], extraido: new Date().toISOString(), fallidos: [] };
   const limite = DESDE ? aOrdenable(DESDE) : '';
 
-  for (const pestana of PESTANAS) {
+  const conBoton = PESTANAS.filter((p) => botonConTexto(p.boton));
+  const recorrido = conBoton.length ? conBoton : [{ src: null, boton: null }];
+  if (!conBoton.length) console.log('Sin pestañas tienda/bodega: recorro la lista que está a la vista.');
+
+  for (const pestana of recorrido) {
     await cerrarDialogos();
-    const boton = botonConTexto(pestana.boton);
-    if (!boton) { console.warn('No encontré la pestaña', pestana.boton); continue; }
-    clic(boton);
-    await esperar(2500);
+    if (pestana.boton) {
+      clic(botonConTexto(pestana.boton));
+      await esperar(2500);
+    }
     await irAPagina(1);
 
     let pagina = 1;
     let terminar = false;
     while (!terminar) {
       const n = document.querySelectorAll(SELECTORES.fila).length;
-      console.log(`[${pestana.src}] página ${pagina}: ${n} filas`);
+      console.log(`[${pestana.src || 'lista'}] página ${pagina}: ${n} filas`);
       for (let i = 0; i < n; i++) {
         const texto = await leerDetalle(i);
-        if (!texto) { resultado.fallidos.push(`${pestana.src} p${pagina} fila ${i + 1}`); continue; }
-        const retiro = parsearDetalle(pestana.src, texto);
+        if (!texto) { resultado.fallidos.push(`${pestana.src || 'lista'} p${pagina} fila ${i + 1}`); continue; }
+        const retiro = parsearDetalle(srcDeTitulo(texto, pestana.src), texto);
         if (limite && aOrdenable(fechaDe(retiro)) < limite) { terminar = true; break; }
-        resultado[pestana.src].push(retiro);
+        resultado[retiro.src].push(retiro);
       }
       await cerrarDialogos();
       if (terminar) break;

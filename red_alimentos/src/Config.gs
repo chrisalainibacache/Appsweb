@@ -9,7 +9,8 @@ const HOJAS = {
   CATEGORIAS: 'Categorias',
   PRECIOS: 'Precios',
   CONFIG: 'Config',
-  CARGAS: 'Cargas'
+  CARGAS: 'Cargas',
+  CORRECCIONES: 'Correcciones'
 };
 
 const COLUMNAS = {
@@ -25,7 +26,8 @@ const COLUMNAS = {
   Categorias: ['palabra_clave', 'categoria'],
   Precios: ['palabra_clave', 'categoria', 'precio_clp', 'por', 'fuente', 'fecha'],
   Config: ['clave', 'valor', 'descripcion'],
-  Cargas: ['fecha', 'origen_carga', 'recibidos', 'nuevos', 'duplicados', 'vacios', 'detalle']
+  Cargas: ['fecha', 'origen_carga', 'recibidos', 'nuevos', 'duplicados', 'vacios', 'detalle'],
+  Correcciones: ['id_retiro', 'producto', 'peso_original', 'peso_corregido', 'nota', 'fecha']
 };
 
 /** Valores por defecto de la hoja Config (editables en la planilla). */
@@ -40,3 +42,14 @@ const PROP_TOKEN_CARGA = 'TOKEN_CARGA';
 
 /** Unidades del portal que se cobran por litro; el resto se cobra por kilo. */
 const UNIDADES_LITRO = ['ml'];
+
+/**
+ * Regla de pago según el estado del portal:
+ *  - "Retirada"                         → se paga.
+ *  - cancelada / anulada / rechazada    → no se paga.
+ *  - pendiente con fecha de retiro ya pasada → se paga: el retiro se hizo aunque
+ *    el portal no lo haya movido a "Retirada".
+ *  - pendiente con fecha de hoy o futura → todavía no se paga.
+ */
+const ESTADOS_NO_PAGABLES = /cancel|anulad|rechaz/i;
+const ESTADOS_RETIRADOS = /retirad/i;

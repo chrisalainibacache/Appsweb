@@ -36,20 +36,34 @@ function cargarRetiros(retiros, origenCarga) {
     if (!hojaRetiros || !hojaLineas) throw new Error('Falta configurar la planilla (menú → Configurar planilla).');
 
     const tarifas = leerTarifas_();
-    const existentes = new Set(leerColumna_(hojaRetiros, 1));
+    // id → fila en la hoja y estado guardado, para detectar retiros que cambiaron de estado
+    // (p. ej. un pendiente que después aparece como "Retirada" o "Cancelada").
+    const colEstado = COLUMNAS.Retiros.indexOf('estado') + 1;
+    const ids = leerColumna_(hojaRetiros, 1);
+    const estados = leerColumna_(hojaRetiros, colEstado);
+    const existentes = new Map();
+    ids.forEach(function (id, i) { existentes.set(id, { fila: i + 2, estado: estados[i] }); });
+
     const ahora = new Date();
     const filasRetiros = [];
     const filasLineas = [];
     let duplicados = 0;
     let vacios = 0;
+    let estadosActualizados = 0;
 
     retiros.forEach(function (crudo) {
       const retiro = normalizarRetiro_(crudo);
-      if (existentes.has(retiro.id)) {
+      const previo = existentes.get(retiro.id);
+      if (previo) {
         duplicados++;
+        if (previo.fila > 0 && retiro.estado && retiro.estado !== previo.estado) {
+          hojaRetiros.getRange(previo.fila, colEstado).setValue(retiro.estado);
+          previo.estado = retiro.estado;
+          estadosActualizados++;
+        }
         return;
       }
-      existentes.add(retiro.id);
+      existentes.set(retiro.id, { fila: -1, estado: retiro.estado });
 
       let kg = 0, lt = 0, monto = 0;
       retiro.lineas.forEach(function (l, i) {
@@ -76,10 +90,12 @@ function cargarRetiros(retiros, origenCarga) {
       nuevos: filasRetiros.length,
       duplicados: duplicados,
       vacios: vacios,
-      lineas: filasLineas.length
+      lineas: filasLineas.length,
+      estadosActualizados: estadosActualizados
     };
     ss.getSheetByName(HOJAS.CARGAS).appendRow([ahora, origenCarga || '', resumen.recibidos,
-      resumen.nuevos, resumen.duplicados, resumen.vacios, JSON.stringify({ lineas: resumen.lineas })]);
+      resumen.nuevos, resumen.duplicados, resumen.vacios,
+      JSON.stringify({ lineas: resumen.lineas, estadosActualizados: estadosActualizados })]);
     return resumen;
   } finally {
     lock.releaseLock();
