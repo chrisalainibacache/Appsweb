@@ -169,6 +169,8 @@
 (function () {
   'use strict';
 
+  // publicar_firebase.ps1 reemplaza este valor con la URL /exec al publicar en Firebase Hosting.
+  const API_POR_DEFECTO = '';
   const enAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
   const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
   const NUM = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 2 });
@@ -191,7 +193,7 @@
         google.script.run.withSuccessHandler(ok).withFailureHandler(fallo).api(accion, token, params || {});
       });
     }
-    const url = leer('api');
+    const url = leer('api') || API_POR_DEFECTO;
     if (!url) return Promise.reject(new Error('Falta la URL de la Web App (Ajustes).'));
     if (accion === 'datos') {
       return fetch(url + '?accion=datos&token=' + encodeURIComponent(token)).then(function (r) { return r.json(); });
@@ -522,7 +524,7 @@
   // ---------- diálogos ----------
   function abrirAjustes() {
     $('lblApi').classList.toggle('oculto', !!enAppsScript);
-    $('cfgApi').value = leer('api');
+    $('cfgApi').value = leer('api') || API_POR_DEFECTO;
     $('cfgToken').value = leer('token');
     $('cfgTokenCarga').value = leer('tokenCarga');
     $('dlgAjustes').showModal();

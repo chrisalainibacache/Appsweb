@@ -57,11 +57,32 @@ Para actualizar después sin cambiar la URL: `.\subir.ps1 -DeploymentId AKfy...`
 
 ## Cómo abrir el dashboard
 
-- **Desde la URL `/exec` de la Web App.** Pide el token de lectura en *Ajustes*.
-- **Como archivo suelto.** `src/Dashboard.html` funciona igual abierto localmente o
-  publicado en cualquier hosting estático, como Firebase Hosting en `aliados-f1e8d`.
-  Úsalo si `script.google.com` falla en el navegador por tener varias cuentas Google
-  iniciadas. En *Ajustes* se pone la URL `/exec` y el token.
+- **URL corta (Firebase Hosting):** **https://semillas-del-cambio.web.app**. Es la opción
+  recomendada: evita el problema de `script.google.com` con varias cuentas Google iniciadas.
+  La URL de la API va incluida, así que la primera vez solo se pide el token de lectura en *Ajustes*.
+- **Desde la URL `/exec` de la Web App.** También pide el token en *Ajustes*.
+- **Como archivo suelto.** `src/Dashboard.html` funciona abierto localmente. En *Ajustes* se
+  pone la URL `/exec` y el token.
+
+### Publicar en Firebase
+
+Se publica en un proyecto Firebase propio (`semillas-del-cambio`) de la cuenta
+`chris.alain.ibacache@gmail.com`, separado de `aliados-f1e8d`.
+
+```powershell
+npm install -g firebase-tools                       # si no está instalado
+firebase login:add chris.alain.ibacache@gmail.com   # agrega la cuenta sin quitar la otra
+.\publicar_firebase.ps1 -ApiUrl "https://script.google.com/macros/s/AKfy.../exec" -CrearProyecto
+```
+
+Las siguientes veces se ejecuta el mismo comando sin `-CrearProyecto`. El script hace tres cosas:
+
+1. Copia `src/Dashboard.html` a `firebase/public/index.html`.
+2. Le inyecta la URL `/exec`.
+3. Hace `firebase deploy`.
+
+Si el nombre `semillas-del-cambio` ya está tomado al crear el proyecto, usa
+`-Proyecto semillas-cambio` y la URL será `https://semillas-cambio.web.app`.
 
 Los tokens se guardan solo en el navegador (`localStorage`), nunca en el código ni en la planilla.
 
