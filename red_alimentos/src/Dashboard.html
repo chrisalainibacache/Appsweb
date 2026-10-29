@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red Alimentos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --text: #1d2330; --muted: #677085; --border: #e2e5eb;
+    --accent: #2f7d4f; --accent-2: #d08a1e; --accent-3: #3b6fb6; --danger: #b8423a;
+    --c1: #2f7d4f; --c2: #3b6fb6; --c3: #d08a1e; --c4: #8a5cb8; --c5: #c9504a; --c6: #2a9a9a;
+    --c7: #9a8a2a; --c8: #6b7a8f; --c9: #d06f9f; --c10: #5a9a3a; --c11: #a0522d; --c12: #4a5ab8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151b; --panel: #1b1f27; --text: #e6e8ec; --muted: #9aa3b5; --border: #2c323d;
+      --accent: #5cb57f; --accent-2: #e3a649; --accent-3: #6f9fe0; --danger: #e0716a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 16px; background: var(--panel); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0; font-size: 18px; }
+  header small { color: var(--muted); display: block; font-weight: normal; font-size: 12px; }
+  main { padding: 16px; max-width: 1400px; margin: 0 auto; }
+  button, .btn { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 8px 12px; font: inherit; cursor: pointer; }
+  button.secundario { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  button:disabled { opacity: .5; cursor: default; }
+  input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: var(--text); }
+  .filtros { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 16px; }
+  .filtros label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+  .kpi span { display: block; color: var(--muted); font-size: 12px; }
+  .kpi strong { display: block; font-size: 22px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .kpi em { font-style: normal; font-size: 12px; color: var(--muted); }
+  nav.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+  nav.tabs button { background: transparent; color: var(--muted); border: 1px solid transparent; }
+  nav.tabs button.activo { background: var(--panel); color: var(--text); border-color: var(--border); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; min-width: 0; }
+  .panel h2 { font-size: 14px; margin: 0 0 10px; }
+  .panel .nota { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+  .lienzo { position: relative; height: 300px; }
+  .tabla-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { font-size: 12px; color: var(--muted); cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--panel); }
+  td.num, th.num { text-align: right; }
+  tr.detalle td { background: var(--bg); white-space: normal; }
+  tr.clic { cursor: pointer; }
+  tr.clic:hover td { background: var(--bg); }
+  .etiqueta { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; border: 1px solid var(--border); color: var(--muted); }
+  .alerta { color: var(--danger); }
+  .oculto { display: none !important; }
+  #estado { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; background: var(--panel); border: 1px solid var(--border); }
+  #estado.error { border-color: var(--danger); color: var(--danger); }
+  dialog { border: 1px solid var(--border); border-radius: 10px; background: var(--panel); color: var(--text); max-width: 520px; width: calc(100% - 32px); }
+  dialog::backdrop { background: rgba(0, 0, 0, .4); }
+  dialog label { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; font-size: 12px; color: var(--muted); }
+  dialog input { width: 100%; }
+  .acciones { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    main, header { padding: 12px 16px; }
+    .kpi strong { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Red Alimentos <small>Semillas del Cambio · <span id="generado">sin datos</span></small></h1>
+  <div class="acciones">
+    <button class="secundario" id="btnImportar">Importar JSON</button>
+    <button class="secundario" id="btnAjustes">Ajustes</button>
+    <button id="btnActualizar">Actualizar</button>
+  </div>
+</header>
+
+<main>
+  <div id="estado" class="oculto"></div>
+
+  <section class="filtros">
+    <label>Desde <input type="date" id="fDesde"></label>
+    <label>Hasta <input type="date" id="fHasta"></label>
+    <label>Origen
+      <select id="fOrigen"><option value="">Todos</option><option value="tienda">Directo en tienda</option><option value="bodega">En bodega</option></select>
+    </label>
+    <label>Tipo <select id="fTipo"><option value="">Todos</option></select></label>
+    <label>Local / canal <select id="fLocal"><option value="">Todos</option></select></label>
+    <button class="secundario" id="btnLimpiar">Limpiar</button>
+  </section>
+
+  <section class="kpis" id="kpis"></section>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="resumen" class="activo">Resumen</button>
+    <button data-tab="productos">Productos</button>
+    <button data-tab="categorias">Categorías</button>
+    <button data-tab="historial">Historial de retiros</button>
+    <button data-tab="locales">Locales</button>
+    <button data-tab="precios">Precios de mercado</button>
+    <button data-tab="alertas">Alertas</button>
+  </nav>
+
+  <section data-panel="resumen" class="grid">
+    <div class="panel"><h2>Valor pagado por mes</h2><div class="lienzo"><canvas id="gPagadoMes"></canvas></div></div>
+    <div class="panel"><h2>Kilos y litros retirados por mes</h2><div class="lienzo"><canvas id="gVolumenMes"></canvas></div></div>
+    <div class="panel"><h2>Pagado por categoría</h2><div class="lienzo"><canvas id="gCategorias"></canvas></div></div>
+    <div class="panel"><h2>Top 10 productos más retirados (kg / lt)</h2><div class="lienzo"><canvas id="gTopProductos"></canvas></div></div>
+    <div class="panel"><h2>Pagado vs valor de mercado por mes</h2><div class="lienzo"><canvas id="gMercadoMes"></canvas></div>
+      <p class="nota">El valor de mercado usa la tabla de precios de referencia; los precios marcados "Estimado" deben validarse.</p></div>
+  </section>
+
+  <section data-panel="productos" class="panel oculto">
+    <div class="filtros"><label>Buscar producto <input type="search" id="buscarProducto" placeholder="leche, harina…"></label></div>
+    <div class="tabla-wrap"><table id="tProductos"></table></div>
+  </section>
+
+  <section data-panel="categorias" class="panel oculto">
+    <div class="tabla-wrap"><table id="tCategorias"></table></div>
+  </section>
+
+  <section data-panel="historial" class="panel oculto">
+    <p class="nota">Haz clic en un retiro para ver sus productos.</p>
+    <div class="tabla-wrap"><table id="tHistorial"></table></div>
+  </section>
+
+  <section data-panel="locales" class="panel oculto">
+    <div class="tabla-wrap"><table id="tLocales"></table></div>
+  </section>
+
+  <section data-panel="precios" class="panel oculto">
+    <p class="nota">Se editan en la hoja <b>Precios</b> de la planilla. La fila con palabra clave <b>*</b> es el precio por defecto de la categoría.</p>
+    <div class="tabla-wrap"><table id="tPrecios"></table></div>
+  </section>
+
+  <section data-panel="alertas" class="panel oculto">
+    <div id="alertas"></div>
+  </section>
+</main>
+
+<dialog id="dlgAjustes">
+  <h2>Ajustes de conexión</h2>
+  <label id="lblApi">URL de la Web App (termina en /exec)
+    <input type="url" id="cfgApi" placeholder="https://script.google.com/macros/s/.../exec">
+  </label>
+  <label>Token de lectura <input type="password" id="cfgToken" autocomplete="off"></label>
+  <label>Token de carga (solo para importar) <input type="password" id="cfgTokenCarga" autocomplete="off"></label>
+  <p class="nota">Los tokens se ven en la planilla: menú Red Alimentos → Ver tokens de acceso. Se guardan solo en este navegador.</p>
+  <div class="acciones">
+    <button class="secundario" id="cfgCancelar">Cancelar</button>
+    <button id="cfgGuardar">Guardar</button>
+  </div>
+</dialog>
+
+<dialog id="dlgImportar">
+  <h2>Importar retiros</h2>
+  <p class="nota">Archivo JSON generado por el script de extracción (<code>scraper/extraer_redalimentos.js</code>). Los retiros que ya existen se omiten.</p>
+  <label>Archivo <input type="file" id="archivoImportar" accept=".json,application/json"></label>
+  <div class="acciones">
+    <button class="secundario" id="impCancelar">Cancelar</button>
+    <button id="impEnviar">Importar</button>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  const enAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
+  const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
+  const NUM = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 2 });
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+  const $ = function (id) { return document.getElementById(id); };
+  const graficos = {};
+  let datos = null;
+  let tabActiva = 'resumen';
+  const orden = {};
+
+  // ---------- almacenamiento local (puede fallar en modo privado / iframe) ----------
+  function leer(clave) { try { return localStorage.getItem('ra_' + clave) || ''; } catch (e) { return ''; } }
+  function guardar(clave, valor) { try { localStorage.setItem('ra_' + clave, valor); } catch (e) { /* sin persistencia */ } }
+
+  // ---------- comunicación con Apps Script ----------
+  function llamar(accion, token, params) {
+    if (enAppsScript) {
+      return new Promise(function (ok, fallo) {
+        google.script.run.withSuccessHandler(ok).withFailureHandler(fallo).api(accion, token, params || {});
+      });
+    }
+    const url = leer('api');
+    if (!url) return Promise.reject(new Error('Falta la URL de la Web App (Ajustes).'));
+    if (accion === 'datos') {
+      return fetch(url + '?accion=datos&token=' + encodeURIComponent(token)).then(function (r) { return r.json(); });
+    }
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ accion: accion, token: token }, params))
+    }).then(function (r) { return r.json(); });
+  }
+
+  function mostrarEstado(texto, esError) {
+    const el = $('estado');
+    el.textContent = texto;
+    el.className = esError ? 'error' : '';
+    if (!texto) el.className = 'oculto';
+  }
+
+  function cargar() {
+    const token = leer('token');
+    if (!token) { abrirAjustes(); mostrarEstado('Configura el token de lectura para ver los datos.'); return; }
+    mostrarEstado('Cargando datos…');
+    $('btnActualizar').disabled = true;
+    llamar('datos', token).then(function (r) {
+      if (!r || !r.ok) throw new Error(r && r.error || 'Respuesta vacía');
+      datos = r.datos;
+      $('generado').textContent = 'actualizado ' + datos.generado;
+      poblarFiltros();
+      mostrarEstado('');
+      render();
+    }).catch(function (e) {
+      mostrarEstado('No se pudieron cargar los datos: ' + (e.message || e), true);
+    }).finally(function () { $('btnActualizar').disabled = false; });
+  }
+
+  // ---------- filtros ----------
+  function poblarFiltros() {
+    llenarSelect($('fTipo'), unicos(datos.retiros.map(function (r) { return r.tipo; })));
+    llenarSelect($('fLocal'), unicos(datos.retiros.map(function (r) { return r.local; })));
+  }
+
+  function llenarSelect(sel, valores) {
+    const actual = sel.value;
+    sel.innerHTML = '<option value="">Todos</option>' + valores.map(function (v) {
+      return '<option>' + esc(v) + '</option>';
+    }).join('');
+    sel.value = valores.indexOf(actual) >= 0 ? actual : '';
+  }
+
+  function filtrar() {
+    const f = { desde: $('fDesde').value, hasta: $('fHasta').value, origen: $('fOrigen').value, tipo: $('fTipo').value, local: $('fLocal').value };
+    const retiros = datos.retiros.filter(function (r) {
+      return (!f.desde || r.fecha >= f.desde) && (!f.hasta || r.fecha <= f.hasta) &&
+        (!f.origen || r.origen === f.origen) && (!f.tipo || r.tipo === f.tipo) && (!f.local || r.local === f.local);
+    });
+    const porId = {};
+    retiros.forEach(function (r) { porId[r.id] = r; });
+    const lineas = datos.lineas.filter(function (l) { return porId[l.idRetiro]; }).map(function (l) {
+      return Object.assign({ retiro: porId[l.idRetiro] }, l);
+    });
+    return { retiros: retiros, lineas: lineas };
+  }
+
+  // ---------- render ----------
+  function render() {
+    if (!datos) return;
+    const sel = filtrar();
+    renderKpis(sel);
+    if (tabActiva === 'resumen') renderResumen(sel);
+    if (tabActiva === 'productos') renderProductos(sel);
+    if (tabActiva === 'categorias') renderCategorias(sel);
+    if (tabActiva === 'historial') renderHistorial(sel);
+    if (tabActiva === 'locales') renderLocales(sel);
+    if (tabActiva === 'precios') renderPrecios();
+    if (tabActiva === 'alertas') renderAlertas(sel);
+  }
+
+  function renderKpis(sel) {
+    const t = totales(sel.lineas);
+    const ahorro = t.mercado - t.monto;
+    const pct = t.mercado ? Math.round(t.monto / t.mercado * 100) : 0;
+    $('kpis').innerHTML = [
+      kpi('Retiros', NUM.format(sel.retiros.length), sel.retiros.filter(function (r) { return !r.nLineas; }).length + ' sin contenido'),
+      kpi('Kilos', NUM.format(t.kg), 'a ' + CLP.format(datos.tarifas.kg) + '/kg'),
+      kpi('Litros', NUM.format(t.lt), 'a ' + CLP.format(datos.tarifas.lt) + '/lt'),
+      kpi('Total pagado', CLP.format(t.monto), ''),
+      kpi('Valor de mercado', CLP.format(t.mercado), 'referencial'),
+      kpi('Diferencia a favor', CLP.format(ahorro), 'pagas el ' + pct + '% del valor')
+    ].join('');
+  }
+
+  function kpi(titulo, valor, nota) {
+    return '<div class="kpi"><span>' + esc(titulo) + '</span><strong>' + esc(valor) + '</strong><em>' + esc(nota) + '</em></div>';
+  }
+
+  function renderResumen(sel) {
+    const meses = agrupar(sel.lineas, function (l) { return l.retiro.fecha.slice(0, 7); });
+    const claves = Object.keys(meses).sort();
+    const etiquetas = claves.map(etiquetaMes);
+    const serie = function (fn) { return claves.map(function (k) { return meses[k].reduce(function (s, l) { return s + fn(l); }, 0); }); };
+
+    dibujar('gPagadoMes', 'bar', etiquetas, [
+      { label: 'Kilos', data: serie(function (l) { return l.medida === 'kg' ? l.monto : 0; }), backgroundColor: color(1), stack: 'p' },
+      { label: 'Litros', data: serie(function (l) { return l.medida === 'lt' ? l.monto : 0; }), backgroundColor: color(2), stack: 'p' }
+    ], { moneda: true, apilado: true });
+
+    dibujar('gVolumenMes', 'bar', etiquetas, [
+      { label: 'Kg', data: serie(function (l) { return l.medida === 'kg' ? l.peso : 0; }), backgroundColor: color(1) },
+      { label: 'Litros', data: serie(function (l) { return l.medida === 'lt' ? l.peso : 0; }), backgroundColor: color(2) }
+    ], {});
+
+    dibujar('gMercadoMes', 'bar', etiquetas, [
+      { label: 'Pagado', data: serie(function (l) { return l.monto; }), backgroundColor: color(1) },
+      { label: 'Valor de mercado', data: serie(function (l) { return l.valorMercado; }), backgroundColor: color(3) }
+    ], { moneda: true });
+
+    const cats = resumirPor(sel.lineas, function (l) { return l.categoria; }).sort(function (a, b) { return b.monto - a.monto; });
+    dibujar('gCategorias', 'doughnut', cats.map(function (c) { return c.clave; }), [
+      { data: cats.map(function (c) { return c.monto; }), backgroundColor: cats.map(function (c, i) { return color(i + 1); }), borderWidth: 0 }
+    ], { moneda: true, sinEjes: true });
+
+    const top = resumirProductos(sel.lineas).sort(function (a, b) { return b.peso - a.peso; }).slice(0, 10);
+    dibujar('gTopProductos', 'bar', top.map(function (p) { return p.nombre; }), [
+      { label: 'kg / lt', data: top.map(function (p) { return redondear(p.peso); }), backgroundColor: color(1) }
+    ], { horizontal: true, sinLeyenda: true });
+  }
+
+  function renderProductos(sel) {
+    const q = $('buscarProducto').value.trim().toLowerCase();
+    const filas = resumirProductos(sel.lineas).filter(function (p) { return !q || p.nombre.toLowerCase().indexOf(q) >= 0; });
+    tabla('tProductos', [
+      { t: 'Producto', k: 'nombre' }, { t: 'Categoría', k: 'categoria' }, { t: 'Retiros', k: 'veces', n: 1 },
+      { t: 'Kg', k: 'kg', n: 1, f: NUM.format }, { t: 'Litros', k: 'lt', n: 1, f: NUM.format },
+      { t: 'Pagado', k: 'monto', n: 1, f: CLP.format }, { t: 'Precio ref.', k: 'precio', n: 1, f: CLP.format },
+      { t: 'Valor mercado', k: 'mercado', n: 1, f: CLP.format }, { t: 'Fuente precio', k: 'fuente' }
+    ], filas, 'monto');
+  }
+
+  function renderCategorias(sel) {
+    const filas = resumirPor(sel.lineas, function (l) { return l.categoria; }).map(function (c) {
+      c.productos = unicos(c.lineas.map(function (l) { return l.clave; })).length;
+      return c;
+    });
+    tabla('tCategorias', [
+      { t: 'Categoría', k: 'clave' }, { t: 'Productos', k: 'productos', n: 1 }, { t: 'Kg', k: 'kg', n: 1, f: NUM.format },
+      { t: 'Litros', k: 'lt', n: 1, f: NUM.format }, { t: 'Pagado', k: 'monto', n: 1, f: CLP.format },
+      { t: 'Valor mercado', k: 'mercado', n: 1, f: CLP.format }, { t: '% del pagado', k: 'pct', n: 1, f: function (v) { return v + '%'; } }
+    ], conPorcentaje(filas), 'monto');
+  }
+
+  function renderHistorial(sel) {
+    const cols = [
+      { t: 'Fecha', k: 'fecha', f: fechaCorta }, { t: 'Origen', k: 'origen' }, { t: 'Tipo', k: 'tipo' },
+      { t: 'Local / canal', k: 'local' }, { t: 'Estado', k: 'estado' }, { t: 'Productos', k: 'nLineas', n: 1 },
+      { t: 'Kg', k: 'kg', n: 1, f: NUM.format }, { t: 'Litros', k: 'lt', n: 1, f: NUM.format },
+      { t: 'Pagado', k: 'monto', n: 1, f: CLP.format }
+    ];
+    tabla('tHistorial', cols, sel.retiros.slice(), 'fecha', function (r) {
+      const ls = datos.lineas.filter(function (l) { return l.idRetiro === r.id; });
+      if (!ls.length) return '<span class="alerta">Retiro sin contenido en el portal. Revisar la guía.</span>';
+      return '<table><tr><th>Producto</th><th>Categoría</th><th class="num">Cant.</th><th>Unidad</th><th class="num">Peso</th><th class="num">Pagado</th><th>Vence</th></tr>' +
+        ls.map(function (l) {
+          return '<tr><td>' + esc(l.producto) + '</td><td>' + esc(l.categoria) + '</td><td class="num">' + NUM.format(l.cantidad) +
+            '</td><td>' + esc(l.unidad) + '</td><td class="num">' + NUM.format(l.peso) + ' ' + l.medida + '</td><td class="num">' +
+            CLP.format(l.monto) + '</td><td>' + fechaCorta(l.vence) + '</td></tr>';
+        }).join('') + '</table>';
+    });
+  }
+
+  function renderLocales(sel) {
+    const filas = resumirPor(sel.lineas, function (l) { return l.retiro.local; }).map(function (c) {
+      c.retiros = sel.retiros.filter(function (r) { return r.local === c.clave; }).length;
+      return c;
+    });
+    tabla('tLocales', [
+      { t: 'Local / canal', k: 'clave' }, { t: 'Retiros', k: 'retiros', n: 1 }, { t: 'Kg', k: 'kg', n: 1, f: NUM.format },
+      { t: 'Litros', k: 'lt', n: 1, f: NUM.format }, { t: 'Pagado', k: 'monto', n: 1, f: CLP.format },
+      { t: '% del pagado', k: 'pct', n: 1, f: function (v) { return v + '%'; } }
+    ], conPorcentaje(filas), 'monto');
+  }
+
+  function renderPrecios() {
+    tabla('tPrecios', [
+      { t: 'Palabra clave', k: 'clave' }, { t: 'Categoría', k: 'categoria' },
+      { t: 'Precio', k: 'precio', n: 1, f: CLP.format }, { t: 'Por', k: 'por' }, { t: 'Fuente', k: 'fuente' }
+    ], datos.precios.slice(), 'categoria');
+  }
+
+  function renderAlertas(sel) {
+    const vacios = sel.retiros.filter(function (r) { return !r.nLineas; });
+    const pesoCero = sel.lineas.filter(function (l) { return !l.peso; });
+    const sinPrecio = unicos(sel.lineas.filter(function (l) { return l.fuentePrecio === 'Promedio categoría'; }).map(function (l) { return l.producto; }));
+    $('alertas').innerHTML =
+      bloque('Retiros sin contenido (' + vacios.length + ')', vacios.map(function (r) {
+        return fechaCorta(r.fecha) + ' · ' + r.local + (r.idSolicitud ? ' · ID ' + r.idSolicitud : '');
+      })) +
+      bloque('Productos con peso 0 (' + pesoCero.length + ')', pesoCero.map(function (l) {
+        return fechaCorta(l.retiro.fecha) + ' · ' + l.producto + ' · cantidad ' + NUM.format(l.cantidad) + ' ' + l.unidad;
+      })) +
+      bloque('Productos valorizados con el promedio de su categoría (' + sinPrecio.length + ')', sinPrecio);
+  }
+
+  function bloque(titulo, items) {
+    return '<h2>' + esc(titulo) + '</h2>' + (items.length
+      ? '<ul>' + items.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>'
+      : '<p class="nota">Nada que revisar.</p>');
+  }
+
+  // ---------- agregaciones ----------
+  function totales(lineas) {
+    return lineas.reduce(function (t, l) {
+      if (l.medida === 'lt') t.lt += l.peso; else t.kg += l.peso;
+      t.monto += l.monto; t.mercado += l.valorMercado;
+      return t;
+    }, { kg: 0, lt: 0, monto: 0, mercado: 0 });
+  }
+
+  function resumirPor(lineas, claveFn) {
+    const g = agrupar(lineas, claveFn);
+    return Object.keys(g).map(function (k) {
+      const t = totales(g[k]);
+      return { clave: k || '(sin dato)', lineas: g[k], kg: redondear(t.kg), lt: redondear(t.lt), monto: t.monto, mercado: t.mercado };
+    });
+  }
+
+  function resumirProductos(lineas) {
+    return resumirPor(lineas, function (l) { return l.clave; }).map(function (c) {
+      const l0 = c.lineas[0];
+      return {
+        nombre: capitalizar(l0.producto), categoria: l0.categoria, veces: unicos(c.lineas.map(function (l) { return l.idRetiro; })).length,
+        kg: c.kg, lt: c.lt, peso: c.kg + c.lt, monto: c.monto, precio: l0.precioMercado, mercado: c.mercado, fuente: l0.fuentePrecio
+      };
+    });
+  }
+
+  function conPorcentaje(filas) {
+    const total = filas.reduce(function (s, f) { return s + f.monto; }, 0) || 1;
+    filas.forEach(function (f) { f.pct = Math.round(f.monto / total * 1000) / 10; });
+    return filas;
+  }
+
+  function agrupar(lista, fn) {
+    return lista.reduce(function (g, x) { const k = fn(x); (g[k] = g[k] || []).push(x); return g; }, {});
+  }
+
+  // ---------- tablas ----------
+  function tabla(id, cols, filas, ordenDefecto, detalleFn) {
+    const o = orden[id] || { k: ordenDefecto, asc: ordenDefecto === 'categoria' };
+    orden[id] = o;
+    filas.sort(function (a, b) {
+      const va = a[o.k], vb = b[o.k];
+      const r = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb), 'es');
+      return o.asc ? r : -r;
+    });
+    const el = $(id);
+    el.innerHTML = '<thead><tr>' + cols.map(function (c) {
+      return '<th data-k="' + c.k + '"' + (c.n ? ' class="num"' : '') + '>' + esc(c.t) + (o.k === c.k ? (o.asc ? ' ▲' : ' ▼') : '') + '</th>';
+    }).join('') + '</tr></thead><tbody>' + filas.map(function (f, i) {
+      return '<tr data-i="' + i + '"' + (detalleFn ? ' class="clic"' : '') + '>' + cols.map(function (c) {
+        const v = f[c.k];
+        return '<td' + (c.n ? ' class="num"' : '') + '>' + esc(c.f ? c.f(v) : (v === undefined || v === null ? '' : v)) + '</td>';
+      }).join('') + '</tr>';
+    }).join('') + '</tbody>';
+
+    el.querySelectorAll('th').forEach(function (th) {
+      th.onclick = function () {
+        const k = th.getAttribute('data-k');
+        orden[id] = { k: k, asc: o.k === k ? !o.asc : false };
+        render();
+      };
+    });
+    if (detalleFn) {
+      el.querySelectorAll('tbody tr.clic').forEach(function (tr) {
+        tr.onclick = function () {
+          const sig = tr.nextElementSibling;
+          if (sig && sig.classList.contains('detalle')) { sig.remove(); return; }
+          const det = document.createElement('tr');
+          det.className = 'detalle';
+          det.innerHTML = '<td colspan="' + cols.length + '">' + detalleFn(filas[Number(tr.getAttribute('data-i'))]) + '</td>';
+          tr.after(det);
+        };
+      });
+    }
+  }
+
+  // ---------- gráficos ----------
+  function dibujar(id, tipo, etiquetas, series, op) {
+    if (typeof Chart === 'undefined') return;
+    const css = getComputedStyle(document.documentElement);
+    const texto = css.getPropertyValue('--muted').trim();
+    const borde = css.getPropertyValue('--border').trim();
+    const fmt = op.moneda ? CLP.format : NUM.format;
+    if (graficos[id]) graficos[id].destroy();
+    graficos[id] = new Chart($(id), {
+      type: tipo,
+      data: { labels: etiquetas, datasets: series },
+      options: {
+        responsive: true, maintainAspectRatio: false, indexAxis: op.horizontal ? 'y' : 'x',
+        plugins: {
+          legend: { display: !op.sinLeyenda, labels: { color: texto } },
+          tooltip: { callbacks: { label: function (c) { return (c.dataset.label || c.label) + ': ' + fmt(tipo === 'doughnut' ? c.parsed : (op.horizontal ? c.parsed.x : c.parsed.y)); } } }
+        },
+        scales: op.sinEjes ? {} : {
+          x: { stacked: !!op.apilado, grid: { color: borde }, ticks: op.horizontal
+            ? { color: texto, callback: function (v) { return fmt(v); } }
+            : { color: texto } },
+          y: { stacked: !!op.apilado, grid: { color: borde }, ticks: op.horizontal
+            ? { color: texto, callback: function (v) { return recortar(this.getLabelForValue(v), 28); } }
+            : { color: texto, callback: function (v) { return fmt(v); } } }
+        }
+      }
+    });
+  }
+
+  function color(i) {
+    return getComputedStyle(document.documentElement).getPropertyValue('--c' + (((i - 1) % 12) + 1)).trim();
+  }
+
+  // ---------- utilidades ----------
+  function esc(v) { return String(v === undefined || v === null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function unicos(lista) { return Array.from(new Set(lista.filter(function (x) { return x !== '' && x !== undefined && x !== null; }))).sort(function (a, b) { return String(a).localeCompare(String(b), 'es'); }); }
+  function redondear(n) { return Math.round(n * 100) / 100; }
+  function etiquetaMes(k) { const p = k.split('-'); return MESES[Number(p[1]) - 1] + ' ' + p[0]; }
+  function fechaCorta(iso) { if (!iso) return ''; const p = iso.split('-'); return p[2] + '-' + p[1] + '-' + p[0]; }
+  function capitalizar(s) { s = String(s || '').toLowerCase(); return s.charAt(0).toUpperCase() + s.slice(1); }
+  function recortar(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
+
+  // ---------- diálogos ----------
+  function abrirAjustes() {
+    $('lblApi').classList.toggle('oculto', !!enAppsScript);
+    $('cfgApi').value = leer('api');
+    $('cfgToken').value = leer('token');
+    $('cfgTokenCarga').value = leer('tokenCarga');
+    $('dlgAjustes').showModal();
+  }
+
+  $('btnAjustes').onclick = abrirAjustes;
+  $('cfgCancelar').onclick = function () { $('dlgAjustes').close(); };
+  $('cfgGuardar').onclick = function () {
+    guardar('api', $('cfgApi').value.trim());
+    guardar('token', $('cfgToken').value.trim());
+    guardar('tokenCarga', $('cfgTokenCarga').value.trim());
+    $('dlgAjustes').close();
+    cargar();
+  };
+
+  $('btnImportar').onclick = function () { $('dlgImportar').showModal(); };
+  $('impCancelar').onclick = function () { $('dlgImportar').close(); };
+  $('impEnviar').onclick = function () {
+    const archivo = $('archivoImportar').files[0];
+    const token = leer('tokenCarga');
+    if (!archivo) return;
+    if (!token) { $('dlgImportar').close(); abrirAjustes(); mostrarEstado('Falta el token de carga.', true); return; }
+    $('impEnviar').disabled = true;
+    archivo.text().then(function (txt) {
+      const j = JSON.parse(txt);
+      const retiros = Array.isArray(j) ? j : (j.tienda || []).concat(j.bodega || []);
+      return llamar('cargar', token, { retiros: retiros, origen: 'importación ' + archivo.name });
+    }).then(function (r) {
+      if (!r || !r.ok) throw new Error(r && r.error || 'Respuesta vacía');
+      const s = r.resumen;
+      $('dlgImportar').close();
+      mostrarEstado('Importación lista: ' + s.nuevos + ' nuevos, ' + s.duplicados + ' ya existían, ' + s.vacios + ' sin contenido.');
+      cargar();
+    }).catch(function (e) {
+      mostrarEstado('No se pudo importar: ' + (e.message || e), true);
+    }).finally(function () { $('impEnviar').disabled = false; });
+  };
+
+  // ---------- eventos ----------
+  $('tabs').addEventListener('click', function (e) {
+    const b = e.target.closest('button[data-tab]');
+    if (!b) return;
+    tabActiva = b.getAttribute('data-tab');
+    document.querySelectorAll('#tabs button').forEach(function (x) { x.classList.toggle('activo', x === b); });
+    document.querySelectorAll('[data-panel]').forEach(function (p) { p.classList.toggle('oculto', p.getAttribute('data-panel') !== tabActiva); });
+    guardar('tab', tabActiva);
+    render();
+  });
+  ['fDesde', 'fHasta', 'fOrigen', 'fTipo', 'fLocal'].forEach(function (id) { $(id).addEventListener('change', render); });
+  $('buscarProducto').addEventListener('input', render);
+  $('btnLimpiar').onclick = function () {
+    ['fDesde', 'fHasta', 'fOrigen', 'fTipo', 'fLocal'].forEach(function (id) { $(id).value = ''; });
+    render();
+  };
+  $('btnActualizar').onclick = cargar;
+
+  const tabGuardada = leer('tab');
+  const botonTab = tabGuardada && document.querySelector('#tabs button[data-tab="' + tabGuardada + '"]');
+  if (botonTab) botonTab.click();
+  cargar();
+})();
+</script>
+</body>
+</html>
