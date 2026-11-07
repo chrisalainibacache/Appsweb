@@ -1,0 +1,39 @@
+# Publica Cadencia (carpeta baile/) en Cloudflare Workers.
+# Se ejecuta al subir cambios de baile/ a main, o a mano desde la pestaña Actions
+# (elige la rama que quieras publicar).
+# Requiere dos secretos del repositorio: CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID.
+name: Publicar Cadencia
+
+on:
+  push:
+    branches: [main]
+    paths: ['baile/**']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cadencia
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: baile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm test
+      - name: Crear el bucket de videos si no existe
+        run: npx wrangler r2 bucket create cadencia-videos || echo "El bucket ya existe"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Publicar
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

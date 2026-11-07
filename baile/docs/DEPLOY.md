@@ -55,3 +55,16 @@ npm run deploy
 - **Grabaciones de alumnos:** hoy no salen del dispositivo. Para que el profe las vea hay que subirlas a R2
   con permisos de escritura firmados y borrado a pedido.
 - **Escala:** si crecen los alumnos o los videos, Cloudflare Stream da streaming adaptativo y URLs firmadas.
+
+## Publicar con GitHub Actions (sin instalar nada en el computador)
+
+El repositorio incluye `.github/workflows/deploy-cadencia.yml`.
+
+1. En Cloudflare, crea un token en *My Profile → API Tokens → Create Token → plantilla "Edit Cloudflare Workers"*
+   y agrégale el permiso *Account → Workers R2 Storage → Edit*.
+2. Copia tu *Account ID* (barra lateral de la página principal de Cloudflare).
+3. En GitHub, en el repositorio `appsweb`: *Settings → Secrets and variables → Actions → New repository secret*:
+   `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`.
+4. En la pestaña *Actions → Publicar Cadencia → Run workflow*, elige la rama y ejecútalo.
+   El resultado es una URL `https://cadencia.<tu-subdominio>.workers.dev`.
+5. Abre esa URL en el celular. Ahí funciona la cámara real (HTTPS).
