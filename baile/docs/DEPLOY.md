@@ -76,3 +76,11 @@ El repositorio incluye `.github/workflows/deploy-cadencia.yml`.
 *Workers & Pages → Create → Connect to Git*: elige `appsweb`, rama de producción
 `claude/nueva-aplicacion-kkkctc`, directorio raíz `baile`, comando de deploy `npx wrangler deploy`.
 Cloudflare publica en cada push y no necesitas tokens en GitHub.
+
+## Alternativa: GitHub Pages (sin Cloudflare)
+
+La carpeta `docs/` en la raíz del repositorio es una copia de `baile/public` lista para GitHub Pages
+(se regenera con `cd baile && npm run pages`). Sirve la app, el video de demostración y la cámara (HTTPS).
+En Settings → Pages: *Deploy from a branch*, rama `claude/nueva-aplicacion-kkkctc`, carpeta `/docs`.
+Queda en `https://chrisalainibacache.github.io/appsweb/`. Pages publica el sitio a todo internet; en
+repositorios privados exige un plan de pago de GitHub.

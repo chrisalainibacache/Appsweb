@@ -8,7 +8,8 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "test": "node --test test/*.test.js",
-    "demo-video": "node tools/make-demo-video.cjs"
+    "demo-video": "node tools/make-demo-video.cjs",
+    "pages": "rm -rf ../docs && mkdir ../docs && cp -r public/. ../docs/ && rm -f ../docs/_headers && touch ../docs/.nojekyll"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
