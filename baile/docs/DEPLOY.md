@@ -65,6 +65,14 @@ El repositorio incluye `.github/workflows/deploy-cadencia.yml`.
 2. Copia tu *Account ID* (barra lateral de la página principal de Cloudflare).
 3. En GitHub, en el repositorio `appsweb`: *Settings → Secrets and variables → Actions → New repository secret*:
    `CLOUDFLARE_API_TOKEN` y `CLOUDFLARE_ACCOUNT_ID`.
-4. En la pestaña *Actions → Publicar Cadencia → Run workflow*, elige la rama y ejecútalo.
+4. El workflow se ejecuta solo al subir cambios a la rama `claude/nueva-aplicacion-kkkctc`, sin mezclar nada
+   a la rama principal. Si ya había corrido antes de que existieran los secretos, entra a *Actions → Publicar Cadencia*,
+   abre la última ejecución y usa *Re-run all jobs*.
    El resultado es una URL `https://cadencia.<tu-subdominio>.workers.dev`.
 5. Abre esa URL en el celular. Ahí funciona la cámara real (HTTPS).
+
+## Alternativa: conectar la rama directo en Cloudflare
+
+*Workers & Pages → Create → Connect to Git*: elige `appsweb`, rama de producción
+`claude/nueva-aplicacion-kkkctc`, directorio raíz `baile`, comando de deploy `npx wrangler deploy`.
+Cloudflare publica en cada push y no necesitas tokens en GitHub.
