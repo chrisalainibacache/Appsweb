@@ -7,15 +7,25 @@ pide feedback al profe.
 **Todo es ficticio.** No hay servidor, base de datos ni contraseñas, y no se guarda nada:
 al recargar la página los datos vuelven a empezar.
 
+## Estructura (igual que Aura)
+- `public/`: la app (HTML, CSS y JS livianos, sin dependencias).
+- `src/index.js`: Worker de Cloudflare que sirve los videos desde R2 con soporte de rangos.
+- `wrangler.jsonc`: configuración. `docs/DEPLOY.md`: pasos para publicar y subir videos.
+- Los videos **no** van al repositorio: viven en el bucket R2 `cadencia-videos`.
+
 ## Cómo verlo
-Abre `index.html` en el navegador, o publica esta carpeta en Cloudflare Pages / GitHub Pages
-(la cámara necesita HTTPS, que ambos entregan).
+`npm install && npm run dev` (http://localhost:8787), o abrir `public/index.html` en el navegador.
+La cámara necesita HTTPS, que Cloudflare entrega al publicar.
+
+## Video real o muñeco
+Si existe `/video/dancehall-vibes.mp4`, la clase usa ese video (pasos por tiempos, cámara lenta, espejo).
+Si no existe, usa un muñeco animado de respaldo.
 
 ## Qué incluye
 - Entrada sin clave como **Alumno**, **Alumno Premium** o **Profesor**. Solo se muestra el username.
-- Clase de ejemplo de 20 s con un profe animado: sesión completa o 4 pasos de 8 tiempos,
-  velocidad 0,5× / 0,75× / 1×, espejo, repetir paso y metrónomo.
-- Grabarse siguiendo al profe (cámara real, sin audio, el video no sale del dispositivo) con
+- Clase de ejemplo (video real o muñeco de respaldo): sesión completa o 4 pasos, velocidad
+  0,5× / 0,75× / 1×, espejo y repetir paso. Con el muñeco, además, contador de tiempos y metrónomo.
+- Grabarse siguiendo al profe (cámara real en alta resolución, sin audio, el video no sale del dispositivo) con
   términos y condiciones de ejemplo.
 - Pedir feedback (solo Premium), pedir aclaración de un paso (1 gratis al mes en el plan básico).
 - Vista del profesor: bandeja con nota 1–7 y comentario, respuesta a dudas, subir clase y elegir canción.

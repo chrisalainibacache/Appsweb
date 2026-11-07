@@ -1,200 +1,3 @@
-<!doctype html>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="claude:viewport-fit-sides" content="cover">
-<title>Cadencia</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-/* Concepto: escenario nocturno de baile. Pista con rejilla, figura de neón
-   (izquierda cian, derecha magenta para seguir al profe) y paneles oscuros. */
-:root{
-  --bg:#0d0a14; --surface:#171123; --surface-2:#221a33; --line:#35294d;
-  --fg:#f3eefc; --muted:#a99fc0;
-  --accent:#ff3d9a; --accent-ink:#1a0610;
-  --cyan:#27e0d0; --gold:#ffc93c; --good:#5be38a; --bad:#ff6b6b;
-  --font-display:'Unbounded','Arial Black',system-ui,sans-serif;
-  --font-body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
-  color-scheme:dark;
-}
-*{box-sizing:border-box}
-html,body{margin:0}
-body{
-  background:var(--bg); color:var(--fg); font:400 15px/1.5 var(--font-body);
-  padding-block:0 40px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
-}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
-.wrap{max-width:1080px;margin:0 auto}
-h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;line-height:1.15}
-h2{font-size:1.25rem;font-weight:700}
-h3{font-size:1rem;font-weight:500}
-p{margin:0}
-button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
-[hidden]{display:none!important}
-.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);font-weight:700}
-.muted{color:var(--muted)}
-.fine{font-size:.8rem;color:var(--muted)}
-.num{font-variant-numeric:tabular-nums}
-
-/* botones */
-.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:.65em 1em;cursor:pointer;font-weight:700;display:inline-flex;align-items:center;gap:.5em;justify-content:center;transition:transform .08s, border-color .15s}
-.btn:hover{border-color:var(--muted)}
-.btn:active{transform:translateY(1px)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.cyan{background:var(--cyan);border-color:var(--cyan);color:#04201d}
-.btn.ghost{background:transparent}
-.btn.sm{padding:.4em .75em;font-size:.85rem}
-.btn[disabled]{opacity:.45;cursor:not-allowed}
-.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:.35em .85em;cursor:pointer;font-weight:500;font-size:.88rem}
-.chip[aria-pressed="true"],.chip.on{background:var(--cyan);border-color:var(--cyan);color:#04201d;font-weight:700}
-
-/* barra superior */
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px;flex-wrap:wrap}
-.brand{font-family:var(--font-display);font-weight:700;font-size:1.15rem;letter-spacing:.02em;display:flex;align-items:center;gap:10px}
-.brand i{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 14px var(--accent),18px 0 0 -2px var(--cyan)}
-.who{display:flex;align-items:center;gap:10px;min-width:0}
-.who b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40vw}
-.badge{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:.25em .55em;background:var(--surface-2);border:1px solid var(--line)}
-.badge.prem{background:var(--gold);color:#2b1d00;border-color:var(--gold)}
-.badge.prof{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.ribbon{font-size:.75rem;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:.3em .7em}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:18px;border-bottom:1px solid var(--line);scrollbar-width:thin}
-.tab{background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:.7em .9em;cursor:pointer;font-weight:700;white-space:nowrap}
-.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
-.tab .dot{display:inline-block;min-width:1.4em;padding:0 .35em;margin-left:.4em;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-size:.72rem;text-align:center}
-
-/* login */
-.login{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:36px;align-items:center;min-height:calc(100dvh - 90px);padding-block:20px}
-.hero h1{font-size:clamp(2.4rem,7vw,4.4rem);font-weight:700;letter-spacing:-.01em;margin:10px 0 14px;background:linear-gradient(90deg,var(--cyan),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero .lead{font-size:1.15rem;max-width:34ch}
-.route{display:flex;align-items:center;gap:10px;margin:22px 0;font-size:.9rem;flex-wrap:wrap}
-.route span{border:1px solid var(--line);border-radius:999px;padding:.3em .8em;background:var(--surface)}
-.route em{font-style:normal;color:var(--muted)}
-.pillars{list-style:none;margin:0;padding:0;display:grid;gap:10px;max-width:46ch}
-.pillars li{display:flex;gap:12px;align-items:baseline;color:var(--muted)}
-.pillars b{color:var(--fg);font-family:var(--font-display);font-weight:500;font-size:.85rem;min-width:7.5em}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
-.card.flat{background:transparent}
-.form{display:grid;gap:14px}
-label.f,.f{display:grid;gap:6px;font-weight:700;font-size:.88rem}
-.f output{display:inline;margin-left:.4em;color:var(--cyan)}
-.in{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:.65em .8em;width:100%;min-width:0}
-.in:focus{border-color:var(--cyan);outline:none}
-textarea.in{min-height:90px;resize:vertical}
-.roles{display:grid;gap:8px}
-
-/* escenario */
-.grid2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:start}
-.stagebox{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#120c1d}
-.stagebox canvas{display:block;width:100%;height:auto}
-.hud{position:absolute;left:12px;right:12px;top:10px;display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;pointer-events:none;gap:8px}
-.hud span{background:rgba(13,10,20,.65);border-radius:6px;padding:.2em .55em}
-.wm{position:absolute;right:12px;bottom:10px;font-size:.72rem;opacity:.45;pointer-events:none}
-.counts{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:12px 0 8px}
-.counts span{height:30px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--font-display);font-size:.78rem;color:var(--muted);transition:background .08s}
-.counts span.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 14px var(--accent)}
-.counts span.on.alt{background:var(--cyan);border-color:var(--cyan);color:#04201d;box-shadow:0 0 14px var(--cyan)}
-input[type=range]{width:100%;accent-color:var(--accent)}
-.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.seg button{background:transparent;border:0;border-right:1px solid var(--line);padding:.5em .8em;cursor:pointer;font-weight:700;color:var(--muted)}
-.seg button:last-child{border-right:0}
-.seg button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg)}
-.steps{display:grid;gap:8px;margin:14px 0}
-.step{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:.7em .9em;cursor:pointer}
-.step[aria-pressed="true"]{border-color:var(--cyan);background:var(--surface-2)}
-.step .n{font-family:var(--font-display);font-size:.8rem;width:2.2em;height:2.2em;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line);flex:none}
-.step[aria-pressed="true"] .n{background:var(--cyan);color:#04201d;border-color:var(--cyan)}
-.step .t{flex:1;min-width:0}
-.step .t small{display:block;color:var(--muted)}
-.step .live{font-size:.7rem;color:var(--accent);font-weight:700;letter-spacing:.08em;visibility:hidden}
-.step.now .live{visibility:visible}
-.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:6px}
-.actions .btn{flex-direction:column;padding:.8em .4em;font-size:.82rem;text-align:center}
-.lock{font-size:.68rem;color:var(--gold);letter-spacing:.06em}
-.classes{display:grid;gap:8px;margin-top:20px}
-.cls{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:.7em .9em;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-.cls.off{opacity:.55}
-.cls .tag{font-size:.7rem;font-weight:700;border-radius:6px;padding:.2em .5em;background:var(--accent);color:var(--accent-ink);white-space:nowrap}
-.cls .tag.gray{background:var(--surface-2);color:var(--muted)}
-
-/* comunidad / listas */
-.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
-.row{display:flex;align-items:center;gap:12px;padding:.6em .8em;border-radius:10px;background:var(--bg);border:1px solid var(--line);min-width:0}
-.row.me{border-color:var(--cyan)}
-.row .pos{font-family:var(--font-display);width:1.6em;color:var(--muted);flex:none}
-.row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
-.row .nm small{display:block;font-weight:400;color:var(--muted)}
-.stars{color:var(--gold);letter-spacing:.1em;white-space:nowrap}
-.stars i{font-style:normal;color:var(--line)}
-.vote{min-width:4.6em}
-.vote[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.inline{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.inline .in{flex:1 1 150px}
-.note{font-family:var(--font-display);font-size:1.3rem;border-radius:10px;padding:.25em .6em;background:var(--surface-2);min-width:2.6em;text-align:center}
-.note.g{color:var(--good)} .note.m{color:var(--gold)} .note.b{color:var(--bad)}
-.fb{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
-.status{display:inline-block;font-size:.72rem;font-weight:700;border-radius:6px;padding:.2em .5em;background:var(--surface-2);color:var(--muted)}
-.status.ok{background:rgba(91,227,138,.15);color:var(--good)}
-.level{height:10px;border-radius:99px;background:var(--bg);border:1px solid var(--line);overflow:hidden;margin-top:8px}
-.level div{height:100%;background:linear-gradient(90deg,var(--cyan),var(--accent))}
-.stack{display:grid;gap:14px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
-.kpi b{display:block;font-family:var(--font-display);font-size:1.4rem}
-.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
-.plan{display:grid;gap:10px;align-content:start}
-.plan.cur{border-color:var(--cyan)}
-.price{font-family:var(--font-display);font-size:1.7rem;font-weight:700}
-.price small{font-family:var(--font-body);font-size:.85rem;color:var(--muted);font-weight:400}
-.plan ul{margin:0;padding-left:1.1em;color:var(--muted);display:grid;gap:4px}
-.vid{width:100%;border-radius:12px;background:#000;aspect-ratio:4/3;object-fit:cover;display:block}
-.fake{aspect-ratio:4/3;border-radius:12px;display:grid;place-items:center;text-align:center;padding:12px;color:var(--muted);background:repeating-linear-gradient(135deg,var(--bg),var(--bg) 12px,var(--surface) 12px,var(--surface) 24px);border:1px dashed var(--line)}
-.partrow{display:grid;grid-template-columns:minmax(0,2fr) 70px 70px auto;gap:8px;align-items:center}
-
-/* modal */
-.overlay{position:fixed;inset:0;background:rgba(5,3,10,.8);z-index:40;display:grid;place-items:center;padding:16px;overflow-y:auto}
-.sheet{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;width:min(720px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;display:grid;gap:14px}
-.sheet header{display:flex;justify-content:space-between;align-items:start;gap:10px}
-.rec-panes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.pane{position:relative;border-radius:12px;overflow:hidden;background:#000;border:1px solid var(--line);min-width:0}
-.pane video,.pane canvas{display:block;width:100%;aspect-ratio:4/4.6;object-fit:cover;transform:scaleX(-1)}
-.pane canvas{transform:none;aspect-ratio:auto;height:auto}
-.pane .cap{position:absolute;left:8px;top:8px;font-size:.72rem;background:rgba(13,10,20,.7);border-radius:6px;padding:.15em .5em}
-.count-in{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:5rem;background:rgba(13,10,20,.55);color:var(--cyan)}
-.recdot{color:var(--bad);font-weight:700}
-.recdot::before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:50%;background:var(--bad);margin-right:.4em;animation:blink 1s infinite}
-@keyframes blink{50%{opacity:.2}}
-.terms{max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg);font-size:.9rem}
-.terms ol{margin:8px 0 0;padding-left:1.2em;display:grid;gap:6px}
-.opt{display:flex;gap:10px;align-items:flex-start;padding:.7em;border:1px solid var(--line);border-radius:12px;cursor:pointer}
-.opt:has(input:checked){border-color:var(--cyan);background:var(--surface-2)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);font-weight:700;padding:.7em 1.1em;border-radius:12px;z-index:60;max-width:calc(100vw - 32px)}
-.sr{position:absolute;left:-9999px}
-
-@media (max-width:860px){
-  .login,.grid2,.cols{grid-template-columns:minmax(0,1fr)}
-  .login{min-height:0;gap:24px}
-}
-@media (max-width:520px){
-  .rec-panes{grid-template-columns:minmax(0,1fr)}
-  .partrow{grid-template-columns:minmax(0,1fr) 64px 64px}
-  .partrow .btn{grid-column:1/-1}
-  .fb{grid-template-columns:minmax(0,1fr)}
-}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
-
-<div class="wrap"><div id="app"></div></div>
-<div id="modal" class="overlay" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
-<div id="toast" class="toast" hidden role="status"></div>
-
-<script>
 'use strict';
 /* =====================================================================
    Cadencia: prototipo. Todos los datos son ficticios y viven solo en
@@ -206,10 +9,17 @@ const clp = n => '$' + n.toLocaleString('es-CL');
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmt = s => { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+const ic = (n, c = '') => `<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 16);
 
 /* ---------- Datos de la clase ---------- */
+// Video real de la clase. Vive en el bucket R2 (ver README) y se sirve desde /video/. Si no existe, se usa el muñeco animado.
+const CLASS_VIDEO = '/video/dancehall-vibes.mp4';
+// Cortes de los 4 pasos en segundos [inicio1, inicio2, inicio3, inicio4, fin]. Si es null, el video se divide en 4 partes iguales.
+const CLASS_CUTS = null;   // ej: [0, 6.5, 12, 18.2, 26]
 const BPM = 96, BEAT = 60 / BPM, COUNTS = 32, DUR = COUNTS * BEAT; // 8 tiempos = 5 s, 4 pasos = 20 s
+const quarters = d => [0, 1, 2, 3].map(i => [d * i / 4, d * (i + 1) / 4]);
+let PARTS = quarters(DUR);   // tramos de cada paso, en segundos
 const STEPS = [
   { n: 'Bounce', d: 'Rodillas abiertas y rebote en cada tiempo. Bombea primero el brazo izquierdo, luego el derecho, luego los dos.' },
   { n: 'Wine de cadera', d: 'Brazos arriba. Lleva la cadera a un lado y al otro mientras el torso se inclina al contrario.' },
@@ -289,14 +99,14 @@ function paintStage(ctx, w, mirror, P, c) {
   if (mirror) { ctx.translate(W, 0); ctx.scale(-1, 1); }
   // fondo y pista
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#120c1d'); g.addColorStop(.6, '#1a1030'); g.addColorStop(1, '#2a1245');
+  g.addColorStop(0, '#120a1f'); g.addColorStop(.6, '#1d0f33'); g.addColorStop(1, '#3a1450');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  ctx.strokeStyle = 'rgba(39,224,208,.22)'; ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(46,230,197,.25)'; ctx.lineWidth = 1;
   for (let i = -8; i <= 8; i++) { ctx.beginPath(); ctx.moveTo(200 + i * 14, FLOOR - 40); ctx.lineTo(200 + i * 70, H); ctx.stroke(); }
   for (let j = 0; j < 6; j++) { const y = FLOOR - 40 + Math.pow(j / 5, 1.7) * (H - FLOOR + 40); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
   // pulso en el piso
   const ph = c % 1, rr = 50 + ph * 90;
-  ctx.strokeStyle = `rgba(255,61,154,${.55 * (1 - ph)})`; ctx.lineWidth = 3;
+  ctx.strokeStyle = `rgba(255,77,141,${.55 * (1 - ph)})`; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.ellipse(dx, FLOOR + 6, rr, rr * .22, 0, 0, 7); ctx.stroke();
   ctx.fillStyle = `rgba(0,0,0,${.35 - Math.min(.25, P.j / 140)})`;
   ctx.beginPath(); ctx.ellipse(dx + k.hip[0], FLOOR + 6, 62, 11, 0, 0, 7); ctx.fill();
@@ -307,7 +117,7 @@ function paintStage(ctx, w, mirror, P, c) {
     ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.shadowColor = col; ctx.shadowBlur = 16;
     ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke();
   };
-  const CY = '#27e0d0', MG = '#ff3d9a', TR = '#cfc6ff';
+  const CY = '#2ee6c5', MG = '#ff4d8d', TR = '#d9d0ff';
   seg([k.lH, k.lLeg[0], k.lLeg[1], [k.lLeg[1][0] - 13, k.lLeg[1][1] + 2]], CY, 12);
   seg([k.rH, k.rLeg[0], k.rLeg[1], [k.rLeg[1][0] + 13, k.rLeg[1][1] + 2]], MG, 12);
   seg([k.lH, k.rH], TR, 14);
@@ -325,7 +135,7 @@ function paintStage(ctx, w, mirror, P, c) {
 }
 
 /* ---------- Estado ---------- */
-const V = { t: 0, playing: false, speed: 1, step: null, loop: true, mirror: false, sound: true, last: performance.now(), lastCount: -1, onEnd: null };
+const V = { vid: null, dur: DUR, t: 0, playing: false, speed: 1, step: null, loop: true, mirror: false, sound: true, last: performance.now(), lastCount: -1, onEnd: null };
 const stages = [];            // canvas que se pintan en cada cuadro
 const S = {
   user: null, tab: 'clase', termsOk: false, expressLeft: 2, freeQuestions: 1, roomInterest: false,
@@ -358,7 +168,7 @@ const isTeacher = () => S.user.role === 'teacher';
 let toastTimer;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 3200); }
 function openModal(html) { $('#sheet').innerHTML = html; $('#modal').hidden = false; const f = $('#sheet [autofocus]') || $('#sheet button'); f && f.focus(); }
-function closeModal() { cleanupRecorder(); $('#modal').hidden = true; $('#sheet').innerHTML = ''; for (let i = stages.length - 1; i >= 0; i--) if (stages[i].modal) stages.splice(i, 1); V.onEnd = null; V.loop = true; refreshControls(); }
+function closeModal() { cleanupRecorder(); { const sb = $('#stagebox'); if (V.vid && sb && !sb.contains(V.vid)) sb.prepend(V.vid); } $('#modal').hidden = true; $('#sheet').innerHTML = ''; for (let i = stages.length - 1; i >= 0; i--) if (stages[i].modal) stages.splice(i, 1); V.onEnd = null; V.loop = true; refreshControls(); }
 
 /* ---------- Audio (metrónomo con tiempos) ---------- */
 let AC;
@@ -375,10 +185,25 @@ function beep(c) {
 }
 
 /* ---------- Motor de reproducción ---------- */
-const range = () => V.step === null ? [0, DUR] : [V.step * 8 * BEAT, (V.step + 1) * 8 * BEAT];
-function setStep(s) { V.step = s; V.t = range()[0]; V.lastCount = -1; refreshControls(); }
-function play(on) { V.playing = on === undefined ? !V.playing : on; if (V.playing) { const [a, b] = range(); if (V.t >= b - .01 || V.t < a) V.t = a; V.lastCount = -1; } refreshControls(); }
+const range = () => V.step === null ? [0, V.dur] : PARTS[V.step];
+function seekTo(t) { V.t = t; V.lastCount = -1; if (V.vid) V.vid.currentTime = t; }
+function setStep(s) { V.step = s; seekTo(range()[0]); refreshControls(); }
+function play(on) { V.playing = on === undefined ? !V.playing : on; if (V.playing) { const [a, b] = range(); if (V.t >= b - .05 || V.t < a) seekTo(a); V.lastCount = -1; } refreshControls(); }
 function advance(dt) {
+  if (V.vid) {   // modo video real: el reloj es el del video
+    const v = V.vid;
+    if (V.playing && v.paused) v.play().catch(() => { V.playing = false; refreshControls(); });
+    if (!V.playing && !v.paused) v.pause();
+    V.t = v.currentTime;
+    if (V.playing) {
+      const [a, b] = range();
+      if (V.t >= b - .04 || v.ended) {
+        if (V.loop) seekTo(a);
+        else { v.pause(); V.playing = false; refreshControls(); const f = V.onEnd; V.onEnd = null; f && f(); }
+      }
+    }
+    return;
+  }
   if (!V.playing) return;
   V.t += dt * V.speed;
   const [a, b] = range();
@@ -406,17 +231,18 @@ function mountCanvas(cv, modal) {
   stages.push({ cv, ctx, modal: !!modal });
 }
 function updateHud(c) {
-  const [a, b] = range(), n = Math.floor(c) % 8, cur = Math.floor(c / 8) % 4;
+  const [a, b] = range(), n = Math.floor(c) % 8, pi = PARTS.findIndex(p => V.t < p[1] - 1e-3), cur = pi < 0 ? 3 : pi;
   const set = (id, fn) => { const e = $(id); e && fn(e); };
-  set('#hudTime', e => e.textContent = fmt(V.t) + ' / ' + fmt(DUR));
+  set('#hudTime', e => e.textContent = fmt(V.t) + ' / ' + fmt(V.dur));
   set('#hudStep', e => e.textContent = V.step === null ? 'Clase completa · Paso ' + (cur + 1) : 'Paso ' + (V.step + 1) + ' · ' + STEPS[V.step].n);
-  set('#seek', e => { if (document.activeElement !== e) e.value = Math.round((V.t - a) / (b - a) * 1000); });
+  set('#seek', e => { if (document.activeElement !== e) e.value = Math.max(0, Math.min(1000, Math.round((V.t - a) / (b - a) * 1000))); });
   document.querySelectorAll('#counts span').forEach((s, i) => { const on = V.playing || V.t > a ? i === n : false; s.classList.toggle('on', on); s.classList.toggle('alt', on && i >= 4); });
   document.querySelectorAll('.step[data-step]').forEach(s => s.classList.toggle('now', V.step === null && V.playing && +s.dataset.step === cur));
 }
 function refreshControls() {
   const set = (sel, fn) => document.querySelectorAll(sel).forEach(fn);
-  set('[data-act="toggle-play"]', e => e.innerHTML = V.playing ? '❚❚ Pausa' : '▶ Reproducir');
+  set('[data-act="toggle-play"]', e => { e.innerHTML = ic(V.playing ? 'pause' : 'play'); e.setAttribute('aria-label', V.playing ? 'Pausar' : 'Reproducir'); });
+  if (V.vid) { V.vid.playbackRate = V.speed; V.vid.muted = !V.sound; V.vid.style.transform = V.mirror ? 'scaleX(-1)' : ''; }
   set('[data-speed]', e => e.setAttribute('aria-pressed', String(+e.dataset.speed === V.speed)));
   set('[data-act="mirror"]', e => e.setAttribute('aria-pressed', String(V.mirror)));
   set('[data-act="loop"]', e => e.setAttribute('aria-pressed', String(V.loop)));
@@ -430,6 +256,7 @@ function refreshControls() {
    ===================================================================== */
 const app = $('#app');
 function render() {
+  if (V.vid) { V.vid.pause(); V.playing = false; }
   if (!S.user) return renderLogin();
   const u = S.user, rolBadge = isTeacher() ? '<span class="badge prof">Profesor</span>' : isPrem() ? '<span class="badge prem">Premium</span>' : '<span class="badge">Alumno</span>';
   const pend = S.submissions.filter(s => s.status === 'pending').length + S.questions.filter(q => !q.reply).length;
@@ -439,12 +266,12 @@ function render() {
   if (!tabs.some(t => t[0] === S.tab)) S.tab = tabs[0][0];
   app.innerHTML = `
     <header class="top">
-      <div class="brand"><i></i>${APP_NAME}</div>
+      <div class="brand"><i>${ic('dance')}</i>${APP_NAME}</div>
       <div class="who"><span class="ribbon">Prototipo · datos ficticios</span>${rolBadge}<b>@${esc(u.username)}</b><button class="btn ghost sm" data-act="logout">Salir</button></div>
     </header>
     <nav class="tabs" role="tablist">${tabs.map(t => `<button class="tab" role="tab" aria-selected="${S.tab === t[0]}" data-act="tab" data-tab="${t[0]}">${t[1]}${t[2] ? `<span class="dot">${t[2]}</span>` : ''}</button>`).join('')}</nav>
     <main id="view">${views[S.tab]()}</main>`;
-  if (S.tab === 'clase') { mountCanvas($('#stage')); refreshControls(); }
+  if (S.tab === 'clase') { if (V.vid) { $('#stagebox').prepend(V.vid); V.vid.style.cssText = ''; } else mountCanvas($('#stage')); refreshControls(); }
 }
 
 function renderLogin() {
@@ -478,38 +305,40 @@ function renderLogin() {
 
 const views = {
   clase() {
-    const cur = S.classes[0];
+    const cur = S.classes[0], r = V.vid ? (V.vid.videoWidth / V.vid.videoHeight).toFixed(4) : 0;
+    const hud = `<div class="hud"><span id="hudStep">Clase completa</span><span class="num" id="hudTime">0:00 / ${fmt(V.dur)}</span></div><div class="wm">@${esc(S.user.username)}</div>`;
+    const stage = V.vid
+      ? `<div class="stagebox vid" id="stagebox" style="aspect-ratio:${r};width:min(100%,calc(82dvh * ${r}))">${hud}</div>`
+      : `<div class="stagebox" id="stagebox"><canvas id="stage" aria-label="El profe baila la coreografía"></canvas>${hud}</div>`;
     return `<div class="grid2">
     <section>
-      <div class="stagebox"><canvas id="stage" aria-label="El profe baila la coreografía"></canvas>
-        <div class="hud"><span id="hudStep">Clase completa</span><span class="num" id="hudTime">0:00 / 0:20</span></div>
-        <div class="wm">@${esc(S.user.username)}</div></div>
-      <div class="counts" id="counts" aria-label="Tiempos 1 a 8">${[1,2,3,4,5,6,7,8].map(n => `<span>${n}</span>`).join('')}</div>
-      <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Posición en la clase">
-      <div class="ctrl">
-        <button class="btn cyan" data-act="toggle-play">▶ Reproducir</button>
-        <button class="btn ghost" data-act="restart" aria-label="Volver al inicio">⟲</button>
-        <span class="seg" role="group" aria-label="Velocidad">${[.5, .75, 1].map(s => `<button data-speed="${s}" data-act="speed" aria-pressed="${s === 1}">${s}×</button>`).join('')}</span>
+      ${stage}
+      ${V.vid ? '' : `<div class="counts" id="counts" aria-label="Tiempos 1 a 8">${[1,2,3,4,5,6,7,8].map(n => `<span>${n}</span>`).join('')}</div>`}
+      <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Posición en la clase" style="margin-top:${V.vid ? 14 : 0}px">
+      <div class="transport">
+        <div class="rb"><button class="round" data-act="restart" aria-label="Volver al inicio">${ic('restart')}</button>Inicio</div>
+        <div class="rb"><button class="round big" data-act="toggle-play" aria-label="Reproducir">${ic('play')}</button><span>&nbsp;</span></div>
+        <div class="rb"><button class="round" data-act="mirror" aria-pressed="false" aria-label="Espejo">${ic('mirror')}</button>Espejo</div>
       </div>
       <div class="ctrl">
-        <button class="chip" data-act="mirror" aria-pressed="false">Espejo</button>
-        <button class="chip" data-act="loop" aria-pressed="true">Repetir</button>
-        <button class="chip" data-act="sound" aria-pressed="true">Sonido</button>
+        <span class="seg" role="group" aria-label="Velocidad">${[.5, .75, 1].map(s => `<button data-speed="${s}" data-act="speed" aria-pressed="${s === 1}">${s}×</button>`).join('')}</span>
+        <button class="chip" data-act="loop" aria-pressed="true">${ic('repeat')}Repetir</button>
+        <button class="chip" data-act="sound" aria-pressed="true">${ic('sound')}Sonido</button>
       </div>
     </section>
     <section>
       <p class="eyebrow">Clase de la semana</p>
       <h2 style="margin-top:6px">${esc(cur.title)}</h2>
-      <p class="muted">${esc(cur.week)} · Profe @profe_dani · 20 s · 4 pasos</p>
+      <p class="muted">${esc(cur.week)} · Profe @profe_dani · ${Math.round(V.dur)} s · 4 pasos</p>
       <div class="steps" role="group" aria-label="Pasos">
-        <button class="step" data-full data-act="step" data-step="full" aria-pressed="true"><span class="n">▶</span><span class="t">Clase completa<small>0:00 – 0:20</small></span></button>
-        ${STEPS.map((s, i) => `<button class="step" data-step="${i}" data-act="step" aria-pressed="false"><span class="n">${i + 1}</span><span class="t">${esc(s.n)}<small>${fmt(i * 5)} – ${fmt(i * 5 + 5)} · 8 tiempos</small></span><span class="live">AHORA</span></button>`).join('')}
+        <button class="step" data-full data-act="step" data-step="full" aria-pressed="true"><span class="n">${ic('play')}</span><span class="t">Clase completa<small>0:00 – ${fmt(V.dur)}</small></span></button>
+        ${STEPS.map((s, i) => `<button class="step" data-step="${i}" data-act="step" aria-pressed="false"><span class="n">${i + 1}</span><span class="t">${esc(s.n)}<small>${fmt(PARTS[i][0])} – ${fmt(PARTS[i][1])}</small></span><span class="live">AHORA</span></button>`).join('')}
       </div>
       <p class="muted" id="stepDesc"></p>
-      <div class="actions">
-        <button class="btn" data-act="rec">● Grabarme<span class="fine">Práctica privada</span></button>
-        <button class="btn" data-act="feedback">★ Pedir feedback<span class="${isPrem() ? 'fine' : 'lock'}">${isPrem() ? 'Del profe' : 'SOLO PREMIUM'}</span></button>
-        <button class="btn" data-act="ask">? Pedir aclaración<span class="fine">${isPrem() ? 'Sin límite' : S.freeQuestions > 0 ? '1 gratis al mes' : 'Solo Premium'}</span></button>
+      <div class="fabs">
+        <button class="fab hot" data-act="rec"><span class="disc">${ic('rec')}</span>Grabarme<small>Práctica privada</small></button>
+        <button class="fab" data-act="feedback"><span class="disc">${ic('star')}</span>Pedir feedback<small class="${isPrem() ? '' : 'lock'}">${isPrem() ? 'Del profe' : 'SOLO PREMIUM'}</small></button>
+        <button class="fab" data-act="ask"><span class="disc">${ic('help')}</span>Pedir aclaración<small>${isPrem() ? 'Sin límite' : S.freeQuestions > 0 ? '1 gratis al mes' : 'Solo Premium'}</small></button>
       </div>
       <div class="classes">
         <h3 class="muted" style="margin-top:6px">Clases anteriores</h3>
@@ -526,11 +355,11 @@ const views = {
       <section class="card"><h2>Ranking de estrellas</h2><p class="muted">Solo se muestran usernames.</p>
         <ul class="list">${rank.map((r, i) => `<li class="row ${r[0] === '@' + me ? 'me' : ''}"><span class="pos">${i + 1}</span><span class="nm">${esc(r[0])}${r[0] === '@' + me ? ' (tú)' : ''}</span><span class="stars num">${r[1]} ★</span></li>`).join('')}</ul></section>
       <section class="card"><h2>Canciones para la próxima clase</h2><p class="muted">Vota o propón. El profe elige entre las más votadas.</p>
-        <ul class="list">${songs.map(s => `<li class="row"><span class="nm">${esc(s.title)}<small>${esc(s.artist)} · propuesta de ${esc(s.by)}${s.chosen ? ' · <b style="color:var(--good)">Elegida por el profe</b>' : ''}</small></span><button class="btn sm vote num" data-act="vote" data-id="${s.id}" aria-pressed="${s.voters.has('@' + me)}">▲ ${s.voters.size}</button></li>`).join('')}</ul>
+        <ul class="list">${songs.map(s => `<li class="row"><span class="nm">${esc(s.title)}<small>${esc(s.artist)} · propuesta de ${esc(s.by)}${s.chosen ? ' · <b style="color:var(--good)">Elegida por el profe</b>' : ''}</small></span><button class="btn sm vote num" data-act="vote" data-id="${s.id}" aria-pressed="${s.voters.has('@' + me)}">${ic('up')}${s.voters.size}</button></li>`).join('')}</ul>
         <form class="inline" id="songForm"><input class="in" id="songTitle" placeholder="Canción" maxlength="40" required><input class="in" id="songArtist" placeholder="Artista" maxlength="40" required><button class="btn primary" type="submit">Proponer</button></form></section>
       <section class="card" style="grid-column:1/-1"><p class="eyebrow">Próximamente</p><h2 style="margin:6px 0 8px">Salas para bailar juntos</h2>
         <p class="muted" style="max-width:60ch">Una sala virtual donde varios alumnos bailan la misma clase al mismo tiempo y se ven entre ellos. Hoy es solo una idea para medir interés.</p>
-        <div class="inline" style="align-items:center"><button class="btn ${S.roomInterest ? 'cyan' : ''}" data-act="room">${S.roomInterest ? '✓ Me interesa' : 'Me interesa'}</button><span class="muted num">${23 + (S.roomInterest ? 1 : 0)} alumnos interesados (ejemplo)</span></div></section>
+        <div class="inline" style="align-items:center"><button class="btn ${S.roomInterest ? 'cyan' : ''}" data-act="room">${S.roomInterest ? ic('check') + 'Me interesa' : 'Me interesa'}</button><span class="muted num">${23 + (S.roomInterest ? 1 : 0)} alumnos interesados (ejemplo)</span></div></section>
     </div>`;
   },
 
@@ -605,7 +434,7 @@ const views = {
   canciones() {
     const songs = [...S.songs].sort((a, b) => b.voters.size - a.voters.size);
     return `<section class="card" style="max-width:640px"><h2>Votaciones de tus alumnos</h2><p class="muted">Marca la canción de la próxima clase.</p>
-      <ul class="list">${songs.map((s, i) => `<li class="row"><span class="pos">${i + 1}</span><span class="nm">${esc(s.title)}<small>${esc(s.artist)} · de ${esc(s.by)}</small></span><span class="num muted">▲ ${s.voters.size}</span><button class="btn sm ${s.chosen ? 'cyan' : ''}" data-act="choose" data-id="${s.id}">${s.chosen ? '✓ Elegida' : 'Elegir'}</button></li>`).join('')}</ul></section>`;
+      <ul class="list">${songs.map((s, i) => `<li class="row"><span class="pos">${i + 1}</span><span class="nm">${esc(s.title)}<small>${esc(s.artist)} · de ${esc(s.by)}</small></span><span class="num muted">${s.voters.size} votos</span><button class="btn sm ${s.chosen ? 'cyan' : ''}" data-act="choose" data-id="${s.id}">${s.chosen ? 'Elegida' : 'Elegir'}</button></li>`).join('')}</ul></section>`;
   },
 };
 
@@ -629,7 +458,7 @@ function openRecord(mode) {
 }
 function termsModal(next) {
   termsModal.next = next;
-  openModal(`<header><div><p class="eyebrow">Antes de grabarte</p><h2>Términos y condiciones</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">✕</button></header>
+  openModal(`<header><div><p class="eyebrow">Antes de grabarte</p><h2>Términos y condiciones</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">${ic('close')}</button></header>
   <div class="terms"><p class="muted">Versión resumida de ejemplo.</p><ol>
     <li>Tus grabaciones son privadas: solo tú y tu profe pueden verlas.</li>
     <li>Se usan únicamente para que el profe te dé feedback y nota.</li>
@@ -641,43 +470,43 @@ function termsModal(next) {
   <p class="fine">Texto de ejemplo. Antes de lanzar la app debe revisarlo un abogado.</p>`);
 }
 function paywall(title) {
-  openModal(`<header><div><p class="eyebrow">Solo Premium</p><h2>${esc(title)}</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">✕</button></header>
+  openModal(`<header><div><p class="eyebrow">Solo Premium</p><h2>${esc(title)}</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">${ic('close')}</button></header>
   <p>Para enviar tu baile al profe y recibir feedback necesitas una cuenta Premium. Es el único plan en que el profe revisa tus videos y te pone nota.</p>
   <div class="card flat"><div class="price">${clp(PRICE.premium)} <small>/ mes</small></div><ul class="muted" style="margin:8px 0 0;padding-left:1.1em"><li>Feedback express de 30 s (2 por mes)</li><li>Nota y estrellas</li><li>Aclaraciones sin límite</li></ul></div>
   <p class="fine">El profe valida cada cuenta Premium antes de darle acceso. En la demo se activa al tiro.</p>
   <div class="inline" style="margin:0"><button class="btn primary" data-act="upgrade">Activar Premium (demo)</button><button class="btn ghost" data-act="close">Ahora no</button></div>`);
 }
 function stepScopeOptions() {
-  return `<option value="full" ${V.step === null ? 'selected' : ''}>Clase completa (20 s)</option>` + STEPS.map((s, i) => `<option value="${i}" ${V.step === i ? 'selected' : ''}>Paso ${i + 1} · ${esc(s.n)} (5 s)</option>`).join('');
+  return `<option value="full" ${V.step === null ? 'selected' : ''}>Clase completa (${Math.round(V.dur)} s)</option>` + STEPS.map((s, i) => `<option value="${i}" ${V.step === i ? 'selected' : ''}>Paso ${i + 1} · ${esc(s.n)} (${Math.round(V.dur / 4)} s)</option>`).join('');
 }
 async function recorderModal() {
   cleanupRecorder(); R.state = 'ready';
-  openModal(`<header><div><p class="eyebrow">${R.mode === 'feedback' ? 'Para el profe' : 'Práctica privada'}</p><h2>Grábate siguiendo al profe</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">✕</button></header>
+  openModal(`<header><div><p class="eyebrow">${R.mode === 'feedback' ? 'Para el profe' : 'Práctica privada'}</p><h2>Grábate siguiendo al profe</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">${ic('close')}</button></header>
   <label class="f" for="recScope">Qué vas a grabar<select class="in" id="recScope">${stepScopeOptions()}</select></label>
   <div class="rec-panes">
-    <div class="pane"><canvas id="stage2"></canvas><span class="cap">Profe</span></div>
-    <div class="pane" id="camPane"><video id="cam" muted playsinline autoplay></video><span class="cap">Tú · sin audio</span><div class="count-in" id="countIn" hidden></div></div>
+    <div class="pane teach" id="teachPane">${V.vid ? '' : '<canvas id="stage2"></canvas>'}<span class="cap">Profe</span></div>
+    <div class="pane" id="camPane"><video id="cam" class="me" muted playsinline autoplay></video><span class="cap">Tú · sin audio</span><div class="count-in" id="countIn" hidden></div></div>
   </div>
   <div id="recInfo" class="muted">Pidiendo acceso a la cámara…</div>
   <div class="inline" style="margin:0" id="recBtns"></div>`);
-  mountCanvas($('#stage2'), true);
+  if (V.vid) { $('#teachPane').prepend(V.vid); V.vid.style.cssText = ''; } else mountCanvas($('#stage2'), true);
   V.speed = 1; V.loop = false; play(false);
   try {
-    R.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+    R.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } }, audio: false });
     $('#cam').srcObject = R.stream;
     $('#recInfo').textContent = 'Ponte donde te vean de cuerpo entero. Tu video no sale de este dispositivo hasta que lo envíes.';
   } catch (e) {
     R.simulated = true;
-    $('#camPane').innerHTML = '<div class="fake" style="height:100%;aspect-ratio:4/4.6">Cámara no disponible:<br>la grabación será simulada</div>';
+    $('#camPane').innerHTML = '<div class="fake" style="height:100%;aspect-ratio:3/4">Cámara no disponible:<br>la grabación será simulada</div>';
     $('#recInfo').textContent = 'No se pudo usar la cámara (permiso denegado o sin cámara). Puedes recorrer el flujo igual, con una grabación simulada.';
   }
   recButtons();
 }
 function recButtons() {
   const b = $('#recBtns'); if (!b) return;
-  if (R.state === 'ready') b.innerHTML = '<button class="btn primary" data-act="rec-start">● Empezar (cuenta 3-2-1)</button>';
-  else if (R.state === 'recording') b.innerHTML = '<span class="recdot" id="recClock">Grabando…</span><button class="btn" data-act="rec-stop">■ Detener</button>';
-  else if (R.state === 'done') b.innerHTML = `<button class="btn" data-act="rec-again">Grabar de nuevo</button><button class="btn primary" data-act="rec-send">${isPrem() ? 'Enviar al profe' : 'Enviar al profe (Premium)'}</button>`;
+  if (R.state === 'ready') b.innerHTML = `<button class="btn primary" data-act="rec-start">${ic('rec')}Empezar (cuenta 3-2-1)</button>`;
+  else if (R.state === 'recording') b.innerHTML = `<span class="recdot" id="recClock">Grabando…</span><button class="btn" data-act="rec-stop">${ic('stop')}Detener</button>`;
+  else if (R.state === 'done') b.innerHTML = `<button class="btn" data-act="rec-again">Grabar de nuevo</button><button class="btn primary" data-act="rec-send">${ic('send')}${isPrem() ? 'Enviar al profe' : 'Enviar al profe (Premium)'}</button>`;
 }
 function recStart() {
   const sc = $('#recScope').value; setStep(sc === 'full' ? null : +sc); play(false);
@@ -689,12 +518,12 @@ function beginRec() {
   R.state = 'recording'; R.chunks = [];
   if (R.stream && window.MediaRecorder) {
     const mt = ['video/webm;codecs=vp9', 'video/webm', 'video/mp4'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
-    R.rec = new MediaRecorder(R.stream, mt ? { mimeType: mt } : undefined);
+    R.rec = new MediaRecorder(R.stream, { ...(mt ? { mimeType: mt } : {}), videoBitsPerSecond: 6000000 });
     R.rec.ondataavailable = e => e.data.size && R.chunks.push(e.data);
     R.rec.onstop = () => { R.blobUrl = URL.createObjectURL(new Blob(R.chunks, { type: R.rec.mimeType || 'video/webm' })); finishRec(); };
     R.rec.start();
   } else R.simulated = true;
-  V.t = range()[0]; V.speed = 1; V.loop = false; V.onEnd = stopRec; play(true);
+  seekTo(range()[0]); V.speed = 1; V.loop = false; V.onEnd = stopRec; play(true);
   recButtons();
 }
 function stopRec() {
@@ -706,7 +535,7 @@ function finishRec() {
   R.state = 'done';
   if (R.stream) { R.stream.getTracks().forEach(t => t.stop()); }
   const pane = $('#camPane'); if (!pane) return;
-  pane.innerHTML = R.blobUrl ? `<video src="${R.blobUrl}" controls playsinline style="transform:none"></video><span class="cap">Tu grabación</span>` : '<div class="fake" style="height:100%;aspect-ratio:4/4.6">Grabación simulada</div>';
+  pane.innerHTML = R.blobUrl ? `<video src="${R.blobUrl}" controls playsinline></video><span class="cap">Tu grabación</span>` : '<div class="fake" style="height:100%;aspect-ratio:3/4">Grabación simulada</div>';
   $('#recScope').disabled = false;
   $('#recInfo').textContent = 'Mira tu grabación. Si no te convence, grábala de nuevo.';
   recButtons();
@@ -717,7 +546,7 @@ function sendPanel() {
   sendPanel.label = label;
   const keep = $('#sheet').innerHTML;
   sendPanel.back = keep;
-  openModal(`<header><div><p class="eyebrow">Enviar al profe</p><h2>${esc(label)}</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">✕</button></header>
+  openModal(`<header><div><p class="eyebrow">Enviar al profe</p><h2>${esc(label)}</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">${ic('close')}</button></header>
   <label class="opt"><input type="radio" name="kind" value="express" checked><span><b>Feedback express · 30 s</b><br><span class="muted">Incluido. Te quedan ${S.expressLeft} este mes.</span></span></label>
   <label class="opt"><input type="radio" name="kind" value="full"><span><b>Feedback completo</b><br><span class="muted">Análisis detallado del profe. ${clp(PRICE.fullFeedback)} extra (en la demo no se cobra).</span></span></label>
   <p class="fine">Solo @profe_dani verá este video. No se comparte con nadie más.</p>
@@ -734,12 +563,12 @@ const actions = {
     if (!/^[a-z0-9_.]{3,16}$/.test(user)) { $('#userHint').textContent = 'El username usa 3 a 16 letras minúsculas, números, punto o guion bajo.'; $('#userHint').style.color = 'var(--bad)'; $('#inUser').focus(); return; }
     S.user = { name: name || 'Invitado', username: user, role }; S.tab = role === 'teacher' ? 'bandeja' : 'clase';
     if (role === 'premium') S.feedbacks.push({ id: 1, user, scope: 'Paso 1 · Bounce', kind: 'express', note: 6.2, stars: 3, comment: 'Muy buen rebote. Abre un poco más los codos en el 3 y estás listo para el paso 2.', by: '@profe_dani', date: 'Semana 44', sample: true });
-    V.t = 0; V.step = null; V.playing = false; render();
+    seekTo(0); V.step = null; V.playing = false; render();
   },
   logout() { cleanupRecorder(); S.user = null; S.feedbacks = []; V.playing = false; render(); },
   tab(b) { S.tab = b.dataset.tab; stages.length = 0; render(); },
   'toggle-play'() { play(); },
-  restart() { V.t = range()[0]; V.lastCount = -1; },
+  restart() { seekTo(range()[0]); },
   speed(b) { V.speed = +b.dataset.speed; refreshControls(); },
   mirror() { V.mirror = !V.mirror; refreshControls(); },
   loop() { V.loop = !V.loop; refreshControls(); },
@@ -749,7 +578,7 @@ const actions = {
   feedback() { openRecord('feedback'); },
   ask() {
     if (!isPrem() && S.freeQuestions < 1) return paywall('Pedir más aclaraciones');
-    openModal(`<header><div><p class="eyebrow">Pregúntale al profe</p><h2>Pedir aclaración</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">✕</button></header>
+    openModal(`<header><div><p class="eyebrow">Pregúntale al profe</p><h2>Pedir aclaración</h2></div><button class="btn ghost sm" data-act="close" aria-label="Cerrar">${ic('close')}</button></header>
     <form class="form" id="askForm"><label class="f" for="askStep">Paso<select class="in" id="askStep">${STEPS.map((s, i) => `<option value="${i + 1}" ${V.step === i ? 'selected' : ''}>Paso ${i + 1} · ${esc(s.n)}</option>`).join('')}</select></label>
     <label class="f" for="askText">Tu duda<textarea class="in" id="askText" placeholder="Ej: ¿En qué tiempo subo los brazos?" required autofocus></textarea></label>
     <p class="fine">${isPrem() ? 'Con Premium puedes preguntar sin límite.' : 'Tienes 1 aclaración gratis este mes.'}</p><button class="btn primary" type="submit">Enviar duda</button></form>`);
@@ -806,7 +635,7 @@ document.addEventListener('input', e => {
   if (t.id === 'inName') { const u = $('#inUser'); if (!u.dataset.touched) u.value = slug(t.value); }
   if (t.id === 'inUser') t.dataset.touched = '1';
   if (t.id === 'acceptTerms') $('#acceptBtn').disabled = !t.checked;
-  if (t.id === 'seek') { const [a, b] = range(); V.t = a + (t.value / 1000) * (b - a); V.lastCount = -1; }
+  if (t.id === 'seek') { const [a, b] = range(); seekTo(a + (t.value / 1000) * (b - a)); }
   if (t.dataset && t.dataset.note) $('#noteOut' + t.dataset.note).textContent = (+t.value).toFixed(1).replace('.', ',');
   if (t.id === 'recScope') { const v = t.value; setStep(v === 'full' ? null : +v); }
 });
@@ -836,6 +665,17 @@ document.addEventListener('change', e => { if (e.target.id === 'upFile' && e.tar
 const _render = render;
 render = function () { _render(); if (S.user && S.tab === 'subir') actions.preset({ dataset: { p: 'four' } }); };
 
+/* Si existe el video real de la clase, se usa en lugar del muñeco. */
+(function probeVideo() {
+  const v = document.createElement('video');
+  v.preload = 'auto'; v.playsInline = true; v.setAttribute('playsinline', ''); v.src = CLASS_VIDEO;
+  v.addEventListener('loadedmetadata', () => {
+    if (!v.videoWidth || !isFinite(v.duration)) return;
+    V.vid = v; V.dur = v.duration; stages.length = 0;
+    PARTS = CLASS_CUTS && CLASS_CUTS.length === 5 ? CLASS_CUTS.slice(0, 4).map((c, i) => [c, CLASS_CUTS[i + 1]]) : quarters(v.duration);
+    if (S.user && S.tab === 'clase' && $('#modal').hidden) render();
+  }, { once: true });
+})();
+
 render();
 requestAnimationFrame(frame);
-</script>

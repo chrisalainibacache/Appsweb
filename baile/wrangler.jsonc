@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cadencia",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    // El Worker atiende primero /api y /video; todo lo demás sale directo de public/.
+    "run_worker_first": ["/api/*", "/video/*"]
+  },
+  // Los videos pesados viven en R2, nunca en el repositorio ni en el HTML.
+  "r2_buckets": [{ "binding": "VIDEOS", "bucket_name": "cadencia-videos" }],
+  "observability": { "enabled": false }
+}

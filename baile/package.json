@@ -1,0 +1,15 @@
+{
+  "name": "cadencia",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Cadencia: clases de baile a distancia. Prototipo con datos ficticios.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

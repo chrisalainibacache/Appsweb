@@ -1,0 +1,7 @@
+node_modules/
+.wrangler/
+.dev.vars
+# Los videos no se versionan: se suben al bucket R2 (ver docs/DEPLOY.md)
+*.mp4
+*.mov
+*.webm
