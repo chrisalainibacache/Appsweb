@@ -4,7 +4,7 @@ import worker, { parseRange } from '../src/index.js';
 
 const DATA = new Uint8Array(1000).map((_, i) => i % 256);
 const env = {
-  ASSETS: { fetch: async () => new Response('asset') },
+  ASSETS: { fetch: async req => { const u = new URL(req.url).pathname; return u === '/video/demo.mp4' ? new Response('demo', { headers: { 'Content-Type': 'video/mp4' } }) : u.startsWith('/video/') ? new Response('nf', { status: 404 }) : new Response('asset'); } },
   VIDEOS: {
     head: async k => (k === 'clase.mp4' ? { size: DATA.length, httpMetadata: { contentType: 'video/mp4' } } : null),
     get: async (k, o) => ({ body: o && o.range ? DATA.slice(o.range.offset, o.range.offset + o.range.length) : DATA }),
@@ -43,6 +43,12 @@ test('rechaza claves inválidas, inexistentes y métodos de escritura', async ()
   assert.equal((await get('/video/otra.mp4')).status, 404);
   assert.equal((await get('/video/clase.exe')).status, 404);
   assert.equal((await get('/video/clase.mp4', {}, 'POST')).status, 405);
+});
+
+test('sin video en R2 usa el de demostración de public/video', async () => {
+  const r = await get('/video/demo.mp4');
+  assert.equal(r.status, 200);
+  assert.equal(await r.text(), 'demo');
 });
 
 test('health y archivos estáticos', async () => {

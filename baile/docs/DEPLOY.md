@@ -28,6 +28,8 @@ npx wrangler r2 object put cadencia-videos/dancehall-vibes.mp4 \
 Un video de 20 s a esa calidad pesa unos 5 a 15 MB. `wrangler r2 object put` acepta archivos de hasta
 unos 300 MB; para clases más largas se sube con la API S3 de R2 o con el panel de Cloudflare.
 
+El Worker sirve primero el video de R2. Si no existe, usa `public/video/dancehall-vibes.mp4` (demostración sintética).
+
 ## 3. Marcar los pasos
 
 Por defecto el video se divide en 4 partes iguales. Para cortes reales, editar `CLASS_CUTS` al

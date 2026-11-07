@@ -14,7 +14,7 @@ const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().repla
 
 /* ---------- Datos de la clase ---------- */
 // Video real de la clase. Vive en el bucket R2 (ver README) y se sirve desde /video/. Si no existe, se usa el muñeco animado.
-const CLASS_VIDEO = '/video/dancehall-vibes.mp4';
+const CLASS_VIDEO = 'video/dancehall-vibes.mp4';
 // Cortes de los 4 pasos en segundos [inicio1, inicio2, inicio3, inicio4, fin]. Si es null, el video se divide en 4 partes iguales.
 const CLASS_CUTS = null;   // ej: [0, 6.5, 12, 18.2, 26]
 const BPM = 96, BEAT = 60 / BPM, COUNTS = 32, DUR = COUNTS * BEAT; // 8 tiempos = 5 s, 4 pasos = 20 s
@@ -139,7 +139,7 @@ const V = { vid: null, dur: DUR, t: 0, playing: false, speed: 1, step: null, loo
 const stages = [];            // canvas que se pintan en cada cuadro
 const S = {
   user: null, tab: 'clase', termsOk: false, expressLeft: 2, freeQuestions: 1, roomInterest: false,
-  feedbacks: [], submissions: [], questions: [], uid: 10,
+  feedbacks: [], submissions: [], questions: [], uid: 20,
   classes: [
     { id: 1, title: 'Dancehall Vibes', week: 'Semana 45', state: 'play' },
     { id: 2, title: 'Afro Warm-up', week: 'Semana 44', state: 'archive' },
@@ -150,6 +150,10 @@ const S = {
     { id: 2, title: 'Pon de Replay', artist: 'Rihanna', by: '@fran.rgua', voters: new Set(['@fran.rgua', '@sofi_ovalle', '@camila_arica']), chosen: false },
     { id: 3, title: 'Lick', artist: 'Shenseea', by: '@camila_arica', voters: new Set(['@camila_arica', '@nico_valpo']), chosen: false },
     { id: 4, title: 'Rude Boy', artist: 'Rihanna', by: '@tomi_sc', voters: new Set(['@tomi_sc']), chosen: false },
+    { id: 5, title: 'Loyalty', artist: 'por confirmar', by: '@profe_dani', voters: new Set(['@profe_dani']), chosen: false },
+    { id: 6, title: 'Kateyes', artist: 'por confirmar', by: '@profe_dani', voters: new Set(['@profe_dani']), chosen: false },
+    { id: 7, title: 'Lucky Brown', artist: 'por confirmar', by: '@profe_dani', voters: new Set(['@profe_dani']), chosen: false },
+    { id: 8, title: 'Jere Klein', artist: 'por confirmar', by: '@profe_dani', voters: new Set(['@profe_dani']), chosen: false },
   ],
   ranking: [['@camila_arica', 18], ['@nico_valpo', 14], ['@fran.rgua', 11], ['@dani_ant', 9], ['@sofi_ovalle', 7], ['@tomi_sc', 4]],
 };
@@ -267,7 +271,8 @@ function render() {
   app.innerHTML = `
     <header class="top">
       <div class="brand"><i>${ic('dance')}</i>${APP_NAME}</div>
-      <div class="who"><span class="ribbon">Demo · datos ficticios</span>${rolBadge}<b>@${esc(u.username)}</b><button class="btn ghost sm" data-act="logout">Salir</button></div>
+      <button class="btn ghost sm" data-act="logout">Salir</button>
+      <div class="who">${rolBadge}<b>@${esc(u.username)}</b><span class="ribbon">Demo</span></div>
     </header>
     <main id="view">${views[S.tab]()}</main>
     <nav class="tabs" aria-label="Secciones">${tabs.map(t => `<button class="tab" aria-current="${S.tab === t[0] ? 'page' : 'false'}" aria-selected="${S.tab === t[0]}" data-act="tab" data-tab="${t[0]}">${t[2] ? `<span class="dot">${t[2]}</span>` : ''}${ic(t[3])}${t[1]}</button>`).join('')}</nav>`;

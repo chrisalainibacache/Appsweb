@@ -28,9 +28,10 @@ export async function canWatch(request, env) {
 async function serveVideo(request, env, key) {
   if (!VIDEO_KEY.test(key)) return new Response('No encontrado', { status: 404 });
   if (!(await canWatch(request, env))) return new Response('Sin acceso', { status: 403 });
-  if (!env.VIDEOS) return new Response('Almacenamiento de video no configurado', { status: 404 });
+  if (!env.VIDEOS) return env.ASSETS ? env.ASSETS.fetch(request) : new Response('No encontrado', { status: 404 });
   const head = await env.VIDEOS.head(key);
-  if (!head) return new Response('No encontrado', { status: 404 });
+  // Si el video no está en R2, se sirve el de demostración incluido en public/video (si existe).
+  if (!head) return env.ASSETS ? env.ASSETS.fetch(request) : new Response('No encontrado', { status: 404 });
   const size = head.size, ext = key.split('.').pop();
   const headers = new Headers({
     'Content-Type': (head.httpMetadata && head.httpMetadata.contentType) || TYPES[ext],

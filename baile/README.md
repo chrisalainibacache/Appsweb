@@ -21,9 +21,14 @@ al recargar la página los datos vuelven a empezar.
 La cámara necesita HTTPS, que Cloudflare entrega al publicar. Para probarla, abre la URL publicada en el celular
 y usa "Agregar a pantalla de inicio".
 
-## Video real o muñeco
-Si existe `/video/dancehall-vibes.mp4`, la clase usa ese video (pasos por tiempos, cámara lenta, espejo).
-Si no existe, usa un muñeco animado de respaldo.
+## Video de la clase
+- `public/video/dancehall-vibes.mp4` es un **video de demostración sintético** (muñeco animado y pista de
+  ritmo dancehall original, 20 s, vertical 1080x1920, 2 MB). No contiene música ni imágenes de terceros.
+  Se regenera con `node tools/make-demo-video.cjs` (requiere ffmpeg y `npm i -D playwright`).
+- Para usar un video real, súbelo a R2 con el mismo nombre (`docs/DEPLOY.md`): el Worker prefiere R2
+  y solo usa el de demostración si no existe.
+- Si no hay ningún video, la app usa el muñeco animado en vivo.
+- La música de las clases reales necesita licencia o autorización. Esta demo no usa canciones comerciales.
 
 ## Qué incluye
 - Entrada sin clave como **Alumno**, **Alumno Premium** o **Profesor**. Solo se muestra el username.

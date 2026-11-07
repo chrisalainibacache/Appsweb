@@ -1,7 +1,9 @@
 node_modules/
 .wrangler/
 .dev.vars
-# Los videos no se versionan: se suben al bucket R2 (ver docs/DEPLOY.md)
+# Los videos reales no se versionan: se suben al bucket R2 (ver docs/DEPLOY.md).
+# Única excepción: el video de demostración sintético (2 MB).
 *.mp4
+!public/video/dancehall-vibes.mp4
 *.mov
 *.webm
