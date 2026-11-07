@@ -261,16 +261,16 @@ function render() {
   const u = S.user, rolBadge = isTeacher() ? '<span class="badge prof">Profesor</span>' : isPrem() ? '<span class="badge prem">Premium</span>' : '<span class="badge">Alumno</span>';
   const pend = S.submissions.filter(s => s.status === 'pending').length + S.questions.filter(q => !q.reply).length;
   const tabs = isTeacher()
-    ? [['bandeja', 'Bandeja', pend], ['subir', 'Subir clase'], ['canciones', 'Canciones'], ['plan', 'Mi plan']]
-    : [['clase', 'Clase'], ['comunidad', 'Comunidad'], ['notas', 'Mis notas'], ['plan', 'Plan']];
+    ? [['bandeja', 'Bandeja', pend, 'inbox'], ['subir', 'Subir', 0, 'upload'], ['canciones', 'Canciones', 0, 'music'], ['plan', 'Mi plan', 0, 'card']]
+    : [['clase', 'Clase', 0, 'dance'], ['comunidad', 'Comunidad', 0, 'users'], ['notas', 'Notas', 0, 'star'], ['plan', 'Plan', 0, 'card']];
   if (!tabs.some(t => t[0] === S.tab)) S.tab = tabs[0][0];
   app.innerHTML = `
     <header class="top">
       <div class="brand"><i>${ic('dance')}</i>${APP_NAME}</div>
-      <div class="who"><span class="ribbon">Prototipo · datos ficticios</span>${rolBadge}<b>@${esc(u.username)}</b><button class="btn ghost sm" data-act="logout">Salir</button></div>
+      <div class="who"><span class="ribbon">Demo · datos ficticios</span>${rolBadge}<b>@${esc(u.username)}</b><button class="btn ghost sm" data-act="logout">Salir</button></div>
     </header>
-    <nav class="tabs" role="tablist">${tabs.map(t => `<button class="tab" role="tab" aria-selected="${S.tab === t[0]}" data-act="tab" data-tab="${t[0]}">${t[1]}${t[2] ? `<span class="dot">${t[2]}</span>` : ''}</button>`).join('')}</nav>
-    <main id="view">${views[S.tab]()}</main>`;
+    <main id="view">${views[S.tab]()}</main>
+    <nav class="tabs" aria-label="Secciones">${tabs.map(t => `<button class="tab" aria-current="${S.tab === t[0] ? 'page' : 'false'}" aria-selected="${S.tab === t[0]}" data-act="tab" data-tab="${t[0]}">${t[2] ? `<span class="dot">${t[2]}</span>` : ''}${ic(t[3])}${t[1]}</button>`).join('')}</nav>`;
   if (S.tab === 'clase') { if (V.vid) { $('#stagebox').prepend(V.vid); V.vid.style.cssText = ''; } else mountCanvas($('#stage')); refreshControls(); }
 }
 
@@ -308,7 +308,7 @@ const views = {
     const cur = S.classes[0], r = V.vid ? (V.vid.videoWidth / V.vid.videoHeight).toFixed(4) : 0;
     const hud = `<div class="hud"><span id="hudStep">Clase completa</span><span class="num" id="hudTime">0:00 / ${fmt(V.dur)}</span></div><div class="wm">@${esc(S.user.username)}</div>`;
     const stage = V.vid
-      ? `<div class="stagebox vid" id="stagebox" style="aspect-ratio:${r};width:min(100%,calc(82dvh * ${r}))">${hud}</div>`
+      ? `<div class="stagebox vid" id="stagebox" style="aspect-ratio:${r};width:min(100%,calc(62dvh * ${r}))">${hud}</div>`
       : `<div class="stagebox" id="stagebox"><canvas id="stage" aria-label="El profe baila la coreografía"></canvas>${hud}</div>`;
     return `<div class="grid2">
     <section>

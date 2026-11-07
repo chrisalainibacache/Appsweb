@@ -1,5 +1,8 @@
 # Cadencia (prototipo)
 
+**App pensada solo para smartphone** (una columna, menú inferior, hojas que suben desde abajo, instalable
+como app desde el navegador del celular). No tiene diseño de escritorio.
+
 Prototipo en HTML de una app de baile a distancia: el profe sube 1 o 2 clases por semana
 (sesión completa o dividida en pasos) y cada alumno practica a su hora, graba su baile y
 pide feedback al profe.
@@ -15,7 +18,8 @@ al recargar la página los datos vuelven a empezar.
 
 ## Cómo verlo
 `npm install && npm run dev` (http://localhost:8787), o abrir `public/index.html` en el navegador.
-La cámara necesita HTTPS, que Cloudflare entrega al publicar.
+La cámara necesita HTTPS, que Cloudflare entrega al publicar. Para probarla, abre la URL publicada en el celular
+y usa "Agregar a pantalla de inicio".
 
 ## Video real o muñeco
 Si existe `/video/dancehall-vibes.mp4`, la clase usa ese video (pasos por tiempos, cámara lenta, espejo).
